@@ -9,7 +9,8 @@
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
             },
             options: {
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
@@ -52,19 +53,20 @@
         }
 
         .option-btn.selected {
-            background: #eab308;
-            color: black;
+            background: #eab308 !important;
+            color: black !important;
             font-weight: bold;
+            border-color: white;
         }
 
         .option-btn.correct {
             background: #22c55e !important;
-            color: white;
+            color: white !important;
         }
 
         .option-btn.wrong {
             background: #ef4444 !important;
-            color: white;
+            color: white !important;
         }
 
         .score-item {
@@ -152,7 +154,7 @@
                 <p class="text-center italic text-blue-700 font-bold mt-4">CHÚC BẠN SỚM TRỞ THÀNH TRIỆU PHÚ!</p>
                 <div class="flex flex-col gap-2 pt-4">
                     <button onclick="showRules()" class="bg-gray-200 text-gray-800 p-3 rounded-lg font-bold hover:bg-gray-300 cursor-pointer">THỂ LỆ</button>
-                    <button onclick="startGame()" class="bg-blue-900 text-white p-4 rounded-lg font-bold hover:bg-blue-800 shadow-lg cursor-pointer uppercase">Mời vào “ghế nóng”</button>
+                    <button onclick="startGame()" class="bg-blue-900 text-white p-4 rounded-lg font-bold hover:bg-blue-800 shadow-lg cursor-pointer uppercase">VÀO NGỒI GHẾ NÓNG</button>
                 </div>
             </div>
         </div>
@@ -185,8 +187,8 @@
         <div id="screen-game" class="hidden-element w-full flex flex-row gap-4 h-full max-w-6xl">
             <!-- Question area -->
             <div class="flex-grow flex flex-col">
-                <div id="question-box" class="bg-blue-900 bg-opacity-80 p-6 rounded-xl border-2 border-white mb-4 relative">
-                    <div id="question-text" class="text-xl font-bold leading-relaxed sentence-case">Câu hỏi sẽ hiện ở đây...</div>
+                <div id="question-box" class="bg-blue-900 bg-opacity-80 p-6 rounded-xl border-2 border-white mb-4 relative min-h-[150px]">
+                    <div id="question-text" class="text-xl font-bold leading-relaxed sentence-case"></div>
                     <div id="help-hint" class="mt-4 p-4 bg-yellow-100 text-blue-900 rounded hidden-element text-sm">
                         <strong>Gợi ý:</strong> <span id="hint-text"></span>
                     </div>
@@ -196,9 +198,12 @@
                     <!-- Options injected by JS -->
                 </div>
 
-                <div id="special-actions" class="mt-4 flex justify-between items-center">
+                <div id="special-actions" class="mt-4 flex flex-wrap gap-4 items-center justify-between">
                     <button id="btn-stop" onclick="confirmStop()" class="hidden-element bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition cursor-pointer uppercase">Dừng cuộc chơi</button>
-                    <button id="btn-next" onclick="nextQuestion()" class="hidden-element bg-green-600 text-white px-8 py-2 rounded font-bold ml-auto hover:bg-green-700 shadow-lg transition cursor-pointer uppercase">Tiếp theo</button>
+                    <div class="flex gap-4 ml-auto">
+                        <button id="btn-confirm-mcq" onclick="confirmMCQSelection()" class="hidden-element bg-yellow-500 text-black px-8 py-2 rounded font-bold hover:bg-yellow-400 shadow-lg transition cursor-pointer uppercase">XÁC NHẬN</button>
+                        <button id="btn-next" onclick="nextQuestion()" class="hidden-element bg-green-600 text-white px-8 py-2 rounded font-bold hover:bg-green-700 shadow-lg transition cursor-pointer uppercase">Tiếp theo</button>
+                    </div>
                 </div>
             </div>
 
@@ -230,13 +235,13 @@
         <!-- Result Screen -->
         <div id="screen-result" class="hidden-element bg-white text-black p-8 rounded-2xl max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
             <div id="celebration-container" class="relative text-center">
-                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2 uppercase">Kết quả phần thi</h2>
-                <p id="result-text" class="text-lg mb-6">Bạn đã hoàn thành phần thi.</p>
+                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2 uppercase">KẾT QUẢ PHẦN THI</h2>
+                <p id="result-text" class="text-lg mb-6"></p>
                 <div id="fireworks-anchor"></div>
             </div>
 
             <div class="flex gap-4 mb-6 justify-center">
-                <button onclick="restartGame()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition cursor-pointer uppercase shadow-lg border-2 border-blue-400">Luyện tập lại</button>
+                <button onclick="restartGame()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition cursor-pointer uppercase shadow-lg border-2 border-blue-400 text-2xl">LUYỆN TẬP LẠI</button>
                 <button onclick="toggleHistory()" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-700 transition cursor-pointer uppercase shadow-lg border-2 border-gray-400">Lịch sử làm bài</button>
             </div>
 
@@ -266,8 +271,6 @@
 
     <script>
         // --- CONSTANTS & STATE ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'millionaire-capacitors-11';
-        
         let state = {
             user: { name: '', sbd: '', class: '', school: '' },
             currentQuestionIndex: 0,
@@ -279,7 +282,8 @@
             helpsUsed: { fifty: false, phone: false, audience: false },
             answers: [], 
             isFinished: false,
-            hasViolated: false
+            hasViolated: false,
+            selectedMCQIndex: null
         };
 
         const SCORES = [0, 0.5, 1, 2, 3, 5, 5.4, 5.8, 6.2, 6.6, 7, 7.3, 7.6, 7.9, 8.2, 8.5, 8.8, 9.1, 9.4, 9.7, 10];
@@ -289,23 +293,23 @@
             { type: 'MCQ', level: 1, q: 'Tụ điện là hệ thống gồm hai vật dẫn đặt gần nhau và ngăn cách nhau bằng', options: ['lớp điện môi.', 'dây dẫn điện.', 'lớp kim loại.', 'dung dịch muối.'], correct: 0, explain: 'Theo định nghĩa, tụ điện gồm hai bản dẫn điện cách nhau bởi một lớp điện môi (cách điện).' },
             { type: 'MCQ', level: 1, q: 'Đơn vị của điện dung trong hệ SI là', options: ['vôn (V).', 'fara (F).', 'culông (C).', 'ampe (A).'], correct: 1, explain: 'Fara (F) là đơn vị đo khả năng tích điện của tụ điện.' },
             { type: 'MCQ', level: 1, q: 'Kí hiệu của điện dung của tụ điện là', options: ['U.', 'Q.', 'C.', 'E.'], correct: 2, explain: 'C (Capacitance) là kí hiệu đại lượng điện dung.' },
-            { type: 'MCQ', level: 1, q: 'Công thức liên hệ giữa điện tích Q, điện dung C và hiệu điện thế U là', options: ['Q = CU.', 'C = QU.', 'U = CQ.', 'Q = C/U.'], correct: 0, explain: 'Công thức cơ bản của tụ điện là Q = CU.' },
-            { type: 'MCQ', level: 1, q: 'Trên vỏ một tụ điện có ghi 470 μF. Con số này cho biết', options: ['hiệu điện thế định mức.', 'điện tích cực đại.', 'điện dung của tụ.', 'năng lượng của tụ.'], correct: 2, explain: 'μF là đơn vị của điện dung.' },
+            { type: 'MCQ', level: 1, q: 'Công thức liên hệ giữa điện tích Q, điện dung C và hiệu điện thế U là', options: ['$Q = CU$.', '$C = QU$.', '$U = CQ$.', '$Q = C/U$.'], correct: 0, explain: 'Công thức cơ bản của tụ điện là $Q = CU$.' },
+            { type: 'MCQ', level: 1, q: 'Trên vỏ một tụ điện có ghi $470 \mu F$. Con số này cho biết', options: ['hiệu điện thế định mức.', 'điện tích cực đại.', 'điện dung của tụ.', 'năng lượng của tụ.'], correct: 2, explain: '$\mu F$ là đơn vị của điện dung.' },
             { type: 'MCQ', level: 1, q: 'Tụ điện có công dụng chính là', options: ['tạo ra dòng điện.', 'ngăn chặn hoàn toàn dòng điện.', 'tích trữ điện tích và năng lượng.', 'làm tăng hiệu điện thế.'], correct: 2, explain: 'Tụ điện tích trữ năng lượng dưới dạng điện trường giữa hai bản tụ.' },
             { type: 'MCQ', level: 2, q: 'Khi tăng hiệu điện thế giữa hai bản tụ điện lên 2 lần thì điện dung của tụ sẽ', options: ['tăng 2 lần.', 'giảm 2 lần.', 'không thay đổi.', 'tăng 4 lần.'], correct: 2, explain: 'Điện dung C chỉ phụ thuộc cấu tạo tụ điện, không phụ thuộc U hay Q.' },
-            { type: 'MCQ', level: 2, q: 'Năng lượng điện trường của tụ điện được tính bằng công thức', options: ['$W = \\frac{1}{2}CU^2$', '$W = CU^2$', '$W = \\frac{1}{2}C^2U$', '$W = \\frac{1}{2}QU^2$'], correct: 0, explain: 'Công thức chuẩn: $W = 1/2 CU^2 = 1/2 QU = 1/2 Q^2/C$.' },
-            { type: 'MCQ', level: 2, q: 'Một tụ điện có điện dung 10 μF được tích điện đến hiệu điện thế 20 V. Điện tích của tụ là', options: ['200 C.', '200 μC.', '2 mC.', '0,5 μC.'], correct: 1, explain: '$Q = CU = 10.10^{-6} \\cdot 20 = 200 \\cdot 10^{-6}$ C = 200 μC.' },
+            { type: 'MCQ', level: 2, q: 'Năng lượng điện trường của tụ điện được tính bằng công thức', options: ['$W = \frac{1}{2}CU^2$', '$W = CU^2$', '$W = \frac{1}{2}C^2U$', '$W = \frac{1}{2}QU^2$'], correct: 0, explain: 'Công thức chuẩn: $W = 1/2 CU^2 = 1/2 QU = 1/2 Q^2/C$.' },
+            { type: 'MCQ', level: 2, q: 'Một tụ điện có điện dung $10 \mu F$ được tích điện đến hiệu điện thế 20 V. Điện tích của tụ là', options: ['200 C.', '200 $\mu C$.', '2 mC.', '0,5 $\mu C$.'], correct: 1, explain: '$Q = CU = 10.10^{-6} \cdot 20 = 200 \cdot 10^{-6}$ C = $200 \mu C$.' },
             { type: 'MCQ', level: 2, q: 'Đơn vị nào sau đây tương đương với Fara (F)?', options: ['V/C.', 'C/V.', 'J/C.', 'C/A.'], correct: 1, explain: 'Từ $C = Q/U$, đơn vị là C/V.' },
             { type: 'MCQ', level: 2, q: 'Khi khoảng cách giữa hai bản tụ điện phẳng tăng lên thì điện dung của nó sẽ', options: ['tăng lên.', 'giảm đi.', 'không đổi.', 'có thể tăng hoặc giảm.'], correct: 1, explain: 'Điện dung tụ phẳng tỉ lệ nghịch với khoảng cách d giữa hai bản.' },
             { type: 'MCQ', level: 2, q: 'Nếu đặt vào hai đầu tụ một hiệu điện thế xoay chiều, tụ điện sẽ', options: ['ngắt mạch hoàn toàn.', 'cho dòng điện đi qua.', 'tích điện vĩnh viễn.', 'bị hỏng ngay lập tức.'], correct: 1, explain: 'Tụ điện cho dòng điện xoay chiều "đi qua" nhờ quá trình tích và phóng điện liên tục.' },
-            { type: 'MCQ', level: 3, q: 'Năng lượng của tụ điện 20 μF khi hiệu điện thế là 10 V là', options: ['1 mJ.', '1 J.', '0,1 mJ.', '200 μJ.'], correct: 0, explain: '$W = 0,5 \\cdot 20 \\cdot 10^{-6} \\cdot 10^2 = 10^{-3}$ J = 1 mJ.' },
-            { type: 'MCQ', level: 3, q: 'Ghép song song hai tụ điện $C_1 = 2 \\mu F$ và $C_2 = 3 \\mu F$. Điện dung tương đương là', options: ['1,2 μF.', '5 μF.', '6 μF.', '1 μF.'], correct: 1, explain: '$C_{ss} = C_1 + C_2 = 5 \\mu F$.' },
-            { type: 'MCQ', level: 3, q: 'Để tụ điện tích được điện tích $10^{-4}$ C dưới hiệu điện thế 5 V, điện dung cần thiết là', options: ['20 μF.', '50 μF.', '2 μF.', '0,5 μF.'], correct: 0, explain: '$C = Q/U = 10^{-4}/5 = 0,2 \\cdot 10^{-4} = 20 \\cdot 10^{-6}$ F = 20 μF.' },
+            { type: 'MCQ', level: 3, q: 'Năng lượng của tụ điện $20 \mu F$ khi hiệu điện thế là 10 V là', options: ['1 mJ.', '1 J.', '0,1 mJ.', '200 $\mu J$.'], correct: 0, explain: '$W = 0,5 \cdot 20 \cdot 10^{-6} \cdot 10^2 = 10^{-3}$ J = 1 mJ.' },
+            { type: 'MCQ', level: 3, q: 'Ghép song song hai tụ điện $C_1 = 2 \mu F$ và $C_2 = 3 \mu F$. Điện dung tương đương là', options: ['1,2 $\mu F$.', '5 $\mu F$.', '6 $\mu F$.', '1 $\mu F$.'], correct: 1, explain: '$C_{ss} = C_1 + C_2 = 5 \mu F$.' },
+            { type: 'MCQ', level: 3, q: 'Để tụ điện tích được điện tích $10^{-4}$ C dưới hiệu điện thế 5 V, điện dung cần thiết là', options: ['20 $\mu F$.', '50 $\mu F$.', '2 $\mu F$.', '0,5 $\mu F$.'], correct: 0, explain: '$C = Q/U = 10^{-4}/5 = 0,2 \cdot 10^{-4} = 20 \cdot 10^{-6}$ F = $20 \mu F$.' },
             { type: 'MCQ', level: 3, q: 'Khi một tụ điện được tích điện, điện trường giữa hai bản là', options: ['điện trường biến thiên.', 'điện trường đều.', 'điện trường xoáy.', 'không có điện trường.'], correct: 1, explain: 'Trong lòng tụ điện phẳng, điện trường là điện trường đều.' },
             { type: 'MCQ', level: 3, q: 'Đồ thị biểu diễn sự phụ thuộc của điện tích Q vào hiệu điện thế U của một tụ điện là', options: ['đường thẳng qua gốc tọa độ.', 'đường parabol.', 'đường hyperbol.', 'đường thẳng song song trục U.'], correct: 0, explain: 'Q = CU là hàm bậc nhất của U, đồ thị là đường thẳng qua gốc tọa độ.' },
             { type: 'MCQ', level: 3, q: 'Một tụ điện tích điện Q, nếu tháo nguồn ra rồi tăng khoảng cách 2 bản tụ, điện tích Q sẽ', options: ['tăng.', 'giảm.', 'không đổi.', 'bằng không.'], correct: 2, explain: 'Khi ngắt nguồn, điện tích không có chỗ thoát nên được bảo toàn.' },
             { type: 'MCQ', level: 1, q: 'Đơn vị mF (milifara) bằng bao nhiêu Fara?', options: ['$10^{-3} F$.', '$10^{-6} F$.', '$10^{-9} F$.', '$10^{3} F$.'], correct: 0, explain: 'm (mili) là tiền tố $10^{-3}$.' },
-            { type: 'MCQ', level: 2, q: 'Điện môi trong tụ điện có tác dụng gì?', options: ['Dẫn điện tốt hơn.', 'Tăng điện dung của tụ.', 'Làm tụ nhẹ hơn.', 'Giảm khả năng tích điện.'], correct: 1, explain: 'Điện môi có hằng số $\\epsilon > 1$ làm tăng điện dung so với chân không.' },
+            { type: 'MCQ', level: 2, q: 'Điện môi trong tụ điện có tác dụng gì?', options: ['Dẫn điện tốt hơn.', 'Tăng điện dung của tụ.', 'Làm tụ nhẹ hơn.', 'Giảm khả năng tích điện.'], correct: 1, explain: 'Điện môi có hằng số $\epsilon > 1$ làm tăng điện dung so với chân không.' },
             { type: 'MCQ', level: 2, q: 'Hiệu điện thế giới hạn của tụ điện là', options: ['U cực đại mà tụ chịu được.', 'U mà tại đó tụ bắt đầu nạp điện.', 'U nhỏ nhất để tụ hoạt động.', 'U trung bình khi sử dụng.'], correct: 0, explain: 'Vượt quá U này, lớp điện môi bị đánh thủng.' },
             { type: 'MCQ', level: 3, q: 'Máy khử rung tim sử dụng linh kiện nào để giải phóng năng lượng lớn trong thời gian ngắn?', options: ['Điện trở.', 'Cuộn cảm.', 'Tụ điện.', 'Pin.'], correct: 2, explain: 'Tụ điện có khả năng tích lũy năng lượng và phóng điện rất mạnh trong thời gian ngắn.' },
             { type: 'MCQ', level: 3, q: 'Một tụ điện có điện dung $C$, tích điện $Q$. Nếu điện tích giảm đi một nửa thì năng lượng tụ', options: ['giảm 2 lần.', 'giảm 4 lần.', 'tăng 2 lần.', 'không đổi.'], correct: 1, explain: '$W = Q^2 / (2C)$, Q giảm 2 thì W giảm $2^2 = 4$.' },
@@ -316,7 +320,7 @@
                 { text: 'Hiệu điện thế giữa hai bản tụ luôn bằng suất điện động của nguồn.', correct: true },
                 { text: 'Nếu thay lớp điện môi bằng vật liệu có hằng số điện môi lớn hơn, điện tích của tụ sẽ tăng.', correct: true },
                 { text: 'Năng lượng điện trường trong tụ sẽ không đổi khi thay đổi cấu tạo tụ.', correct: false }
-            ], hint: 'Khi nối với nguồn, U không đổi. Công thức $C = \\epsilon S / (4\\pi k d)$. $Q = CU$, $W = 0,5 CU^2$.' },
+            ], hint: 'Khi nối với nguồn, U không đổi. $C = \epsilon S / (4\pi k d)$. $Q = CU$, $W = 0,5 CU^2$.' },
             { type: 'TF', level: 2, q: 'Cho các nhận định về tụ điện và năng lượng điện trường.', sub: [
                 { text: 'Đơn vị của năng lượng điện trường là Jun (J).', correct: true },
                 { text: 'Tụ điện chỉ có thể tích điện khi đặt trong chân không.', correct: false },
@@ -329,12 +333,12 @@
                 { text: 'Khi ngắt tụ khỏi nguồn, điện dung của tụ sẽ biến mất.', correct: false },
                 { text: 'Muốn xả điện cho tụ, ta nối tắt hai bản tụ bằng một dây dẫn.', correct: true }
             ], hint: 'Điện dung là thuộc tính cấu tạo, luôn tồn tại dù có điện hay không.' },
-            { type: 'TF', level: 3, q: 'Xét tụ điện có thông số 2000 μF - 16 V.', sub: [
-                { text: 'Điện dung cực đại của tụ là 2000 μF.', correct: true },
+            { type: 'TF', level: 3, q: 'Xét tụ điện có thông số $2000 \mu F - 16 V$.', sub: [
+                { text: 'Điện dung cực đại của tụ là $2000 \mu F$.', correct: true },
                 { text: 'Tụ điện này có thể hoạt động an toàn ở hiệu điện thế 20 V.', correct: false },
                 { text: 'Điện tích cực đại mà tụ có thể tích được là 32 mC.', correct: true },
                 { text: 'Năng lượng tối đa tụ có thể tích trữ là 0,256 J.', correct: true }
-            ], hint: '$Q_{max} = C \\cdot U_{max}$; $W_{max} = 0,5 \\cdot C \\cdot U_{max}^2$.' },
+            ], hint: '$Q_{max} = C \cdot U_{max}$; $W_{max} = 0,5 \cdot C \cdot U_{max}^2$.' },
             { type: 'TF', level: 1, q: 'Các phát biểu sau về cấu tạo tụ điện.', sub: [
                 { text: 'Hai bản của tụ điện phải là vật dẫn điện.', correct: true },
                 { text: 'Lớp ở giữa hai bản tụ phải là vật dẫn điện.', correct: false },
@@ -347,12 +351,12 @@
                 { text: 'Năng lượng W tỉ lệ thuận với bình phương hiệu điện thế U.', correct: true },
                 { text: 'Khi U = 0 thì điện dung C cũng bằng 0.', correct: false }
             ], hint: 'C là hằng số với một tụ điện cụ thể.' },
-            { type: 'TF', level: 3, q: 'Một tụ điện phẳng được tích điện rồi ngắt khỏi nguồn. Sau đó lấp đầy khoảng không gian giữa hai bản bằng hằng số điện môi ε.', sub: [
+            { type: 'TF', level: 3, q: 'Một tụ điện phẳng được tích điện rồi ngắt khỏi nguồn. Sau đó lấp đầy khoảng không gian giữa hai bản bằng hằng số điện môi $\epsilon$.', sub: [
                 { text: 'Điện tích của tụ điện không đổi.', correct: true },
-                { text: 'Điện dung của tụ điện tăng lên ε lần.', correct: true },
-                { text: 'Hiệu điện thế giữa hai bản tụ giảm đi ε lần.', correct: true },
-                { text: 'Năng lượng điện trường của tụ tăng lên ε lần.', correct: false }
-            ], hint: '$Q$ không đổi, $C$ tăng $\\epsilon \\Rightarrow U = Q/C$ giảm $\\epsilon$, $W = Q^2/(2C)$ giảm $\\epsilon$.' },
+                { text: 'Điện dung của tụ điện tăng lên $\epsilon$ lần.', correct: true },
+                { text: 'Hiệu điện thế giữa hai bản tụ giảm đi $\epsilon$ lần.', correct: true },
+                { text: 'Năng lượng điện trường của tụ tăng lên $\epsilon$ lần.', correct: false }
+            ], hint: '$Q$ không đổi, $C$ tăng $\epsilon \Rightarrow U = Q/C$ giảm $\epsilon$, $W = Q^2/(2C)$ giảm $\epsilon$.' },
             { type: 'TF', level: 2, q: 'Ứng dụng của tụ điện trong đời sống.', sub: [
                 { text: 'Tụ điện dùng để lọc nhiễu trong các mạch nguồn.', correct: true },
                 { text: 'Tụ điện dùng để tích trữ điện năng cung cấp cho thành phố.', correct: false },
@@ -360,14 +364,14 @@
                 { text: 'Tụ điện giúp khởi động động cơ điện (tụ đề).', correct: true }
             ], hint: 'Tụ trữ năng lượng ít, không dùng thay thế nhà máy điện.' },
 
-            { type: 'SA', level: 2, q: 'Một tụ điện có điện dung 5 μF được tích điện đến 12 V. Tính điện tích của tụ theo đơn vị μC. (Chỉ nhập số)', correct: '60', explain: '$Q = C \\cdot U = 5 \\cdot 12 = 60 \\mu C$.', hint: 'Sử dụng công thức Q = C.U.' },
+            { type: 'SA', level: 2, q: 'Một tụ điện có điện dung $5 \mu F$ được tích điện đến 12 V. Tính điện tích của tụ theo đơn vị $\mu C$. (Chỉ nhập số)', correct: '60', explain: '$Q = C \cdot U = 5 \cdot 12 = 60 \mu C$.', hint: 'Sử dụng công thức Q = C.U.' },
             { type: 'SA', level: 2, q: 'Tụ điện tích được 0,02 C khi nối vào nguồn 10 V. Điện dung của tụ là bao nhiêu mF? (Chỉ nhập số)', correct: '2', explain: '$C = Q/U = 0,02/10 = 0,002 F = 2 mF$.', hint: 'Lưu ý đổi đơn vị sang mF ($10^{-3} F$).' },
-            { type: 'SA', level: 3, q: 'Tính năng lượng (theo mJ) của tụ điện 100 μF khi hiệu điện thế là 20 V. (Chỉ nhập số)', correct: '20', explain: '$W = 0,5 \\cdot 100 \\cdot 10^{-6} \\cdot 20^2 = 0,02 J = 20 mJ$.', hint: 'Công thức $W = 0,5 CU^2$. Đổi J sang mJ.' },
-            { type: 'SA', level: 3, q: 'Một tụ điện có điện dung 2 μF. Để tích năng lượng 0,25 J thì cần hiệu điện thế bao nhiêu vôn? (Chỉ nhập số)', correct: '500', explain: '$U = \\sqrt{2W/C} = \\sqrt{2 \\cdot 0,25 / 2 \\cdot 10^{-6}} = 500 V$.', hint: 'Rút U từ công thức năng lượng.' },
-            { type: 'SA', level: 2, q: 'Xét các nhận định: 1. Đơn vị Fara; 2. C phụ thuộc U; 3. Tụ tích điện; 4. Có lớp điện môi; 5. Q=CU; 6. C là vật dẫn. Chọn các nhận định ĐÚNG rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.', correct: '1345', explain: 'Nhận định đúng: 1, 3, 4, 5.', hint: 'Kiểm tra kỹ từng phát biểu lý thuyết.' },
+            { type: 'SA', level: 3, q: 'Tính năng lượng (theo mJ) của tụ điện $100 \mu F$ khi hiệu điện thế là 20 V. (Chỉ nhập số)', correct: '20', explain: '$W = 0,5 \cdot 100 \cdot 10^{-6} \cdot 20^2 = 0,02 J = 20 mJ$.', hint: 'Công thức $W = 0,5 CU^2$. Đổi J sang mJ.' },
+            { type: 'SA', level: 3, q: 'Một tụ điện có điện dung $2 \mu F$. Để tích năng lượng 0,25 J thì cần hiệu điện thế bao nhiêu vôn? (Chỉ nhập số)', correct: '500', explain: '$U = \sqrt{2W/C} = \sqrt{2 \cdot 0,25 / (2 \cdot 10^{-6})} = 500 V$.', hint: 'Rút U từ công thức năng lượng.' },
+            { type: 'SA', level: 2, q: 'Xét các nhận định: 1. Đơn vị Fara; 2. C phụ thuộc U; 3. Tụ tích điện; 4. Có lớp điện môi; 5. $Q=CU$; 6. C là vật dẫn. Chọn các nhận định ĐÚNG rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.', correct: '1345', explain: 'Nhận định đúng: 1, 3, 4, 5.', hint: 'Kiểm tra kỹ từng phát biểu lý thuyết.' },
             { type: 'SA', level: 2, q: 'Một nhóm học sinh nêu các đơn vị tương đương với Fara: 1. C/V; 2. V/C; 3. $J/V^2$; 4. $C^2/J$. Chọn các nhận định ĐÚNG rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.', correct: '134', explain: '1 đúng ($C=Q/U$); 3 đúng ($C=2W/U^2$); 4 đúng ($C=Q^2/2W$).', hint: 'Dựa vào công thức $Q=CU$ và $W=0,5 CU^2$.' },
-            { type: 'SA', level: 3, q: 'Điện tích của tụ điện tăng thêm 20 μC khi hiệu điện thế tăng từ 4 V lên 6 V. Điện dung của tụ là bao nhiêu μF? (Chỉ nhập số)', correct: '10', explain: '$C = \\Delta Q / \\Delta U = 20 / (6-4) = 10 \\mu F$.', hint: '$Q_2 - Q_1 = C(U_2 - U_1)$.' },
-            { type: 'SA', level: 3, q: 'Có 3 tụ điện giống hệt nhau. Khi mắc song song điện dung tổng là 9 μF. Nếu mắc nối tiếp thì điện dung tổng là bao nhiêu μF? (Chỉ nhập số)', correct: '1', explain: '$C_{ss} = 3C = 9 \\Rightarrow C = 3 \\mu F$. Mắc nối tiếp $C_{nt} = C/3 = 1 \\mu F$.', hint: 'Tính điện dung của một tụ trước.' }
+            { type: 'SA', level: 3, q: 'Điện tích của tụ điện tăng thêm $20 \mu C$ khi hiệu điện thế tăng từ 4 V lên 6 V. Điện dung của tụ là bao nhiêu $\mu F$? (Chỉ nhập số)', correct: '10', explain: '$C = \Delta Q / \Delta U = 20 / (6-4) = 10 \mu F$.', hint: '$Q_2 - Q_1 = C(U_2 - U_1)$.' },
+            { type: 'SA', level: 3, q: 'Có 3 tụ điện giống hệt nhau. Khi mắc song song điện dung tổng là $9 \mu F$. Nếu mắc nối tiếp thì điện dung tổng là bao nhiêu $\mu F$? (Chỉ nhập số)', correct: '1', explain: '$C_{ss} = 3C = 9 \Rightarrow C = 3 \mu F$. Mắc nối tiếp $C_{nt} = C/3 = 1 \mu F$.', hint: 'Tính điện dung của một tụ trước.' }
         ];
 
         // --- CORE LOGIC ---
@@ -390,7 +394,7 @@
 
         function triggerMathJax() {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise().catch(err => console.error(err));
+                window.MathJax.typesetPromise();
             }
         }
 
@@ -454,6 +458,7 @@
             state.hasViolated = false;
             state.helpsUsed = { fifty: false, phone: false, audience: false };
             state.answers = [];
+            state.selectedMCQIndex = null;
 
             document.getElementById('screen-login').classList.add('hidden-element');
             document.getElementById('screen-game').classList.remove('hidden-element');
@@ -492,11 +497,13 @@
             const helpHint = document.getElementById('help-hint');
             const nextBtn = document.getElementById('btn-next');
             const stopBtn = document.getElementById('btn-stop');
+            const confirmBtn = document.getElementById('btn-confirm-mcq');
 
             qText.innerHTML = `Câu ${state.currentQuestionIndex + 1}: ${q.q}`;
             optionsBox.innerHTML = '';
             helpHint.classList.add('hidden-element');
             nextBtn.classList.add('hidden-element');
+            confirmBtn.classList.add('hidden-element');
             
             document.querySelectorAll('.score-item').forEach(el => el.classList.remove('score-active'));
             const sideItem = document.getElementById(`s-${state.currentQuestionIndex + 1}`);
@@ -512,7 +519,7 @@
                     const btn = document.createElement('button');
                     btn.className = 'option-btn sentence-case';
                     btn.innerHTML = opt.text;
-                    btn.onclick = () => selectMCQ(btn, opt.originalIdx, q.correct);
+                    btn.onclick = () => selectMCQ(btn, opt.originalIdx);
                     optionsBox.appendChild(btn);
                 });
             } else if (q.type === 'TF') {
@@ -531,7 +538,7 @@
                 const submitBtn = document.createElement('button');
                 submitBtn.id = 'tf-submit';
                 submitBtn.className = 'col-span-full bg-blue-600 p-3 rounded-xl font-bold opacity-50 cursor-not-allowed mt-4 cursor-pointer';
-                submitBtn.innerText = 'GỬI KẾT QUẢ';
+                submitBtn.innerText = 'XÁC NHẬN NỘP BÀI';
                 submitBtn.disabled = true;
                 submitBtn.onclick = () => checkTF();
                 optionsBox.appendChild(submitBtn);
@@ -540,7 +547,7 @@
                 container.className = 'col-span-full space-y-4';
                 container.innerHTML = `
                     <input type="text" id="sa-input" maxlength="4" class="w-full p-5 text-black rounded-xl text-center font-bold text-2xl shadow-inner border-4 border-blue-900 focus:border-yellow-400 outline-none" placeholder="Nhập kết quả (VD: 2,5)">
-                    <button onclick="checkSA()" class="w-full bg-blue-600 p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg cursor-pointer">NỘP ĐÁP ÁN</button>
+                    <button onclick="checkSA()" class="w-full bg-blue-600 p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg cursor-pointer">XÁC NHẬN NỘP BÀI</button>
                 `;
                 optionsBox.appendChild(container);
             }
@@ -548,26 +555,41 @@
             triggerMathJax();
         }
 
-        function selectMCQ(btn, choice, correct) {
+        // --- MCQ HANDLING ---
+        function selectMCQ(btn, choiceIdx) {
             playSound('sound-ping');
+            // Reset others
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.selectedMCQIndex = choiceIdx;
+            document.getElementById('btn-confirm-mcq').classList.remove('hidden-element');
+        }
+
+        function confirmMCQSelection() {
+            if (state.selectedMCQIndex === null) return;
+            
+            const q = state.currentQuestions[state.currentQuestionIndex];
             const allBtns = document.querySelectorAll('.option-btn');
             allBtns.forEach(b => b.style.pointerEvents = 'none');
-            btn.classList.add('selected');
+            document.getElementById('btn-confirm-mcq').classList.add('hidden-element');
+
+            const isCorrect = state.selectedMCQIndex === q.correct;
             
+            // Highlight result
             setTimeout(() => {
-                const isCorrect = choice === correct;
                 if (isCorrect) {
-                    btn.classList.add('correct');
+                    document.querySelector('.option-btn.selected').classList.add('correct');
                     playSound('sound-correct');
                     handleCorrect();
                 } else {
-                    btn.classList.add('wrong');
+                    document.querySelector('.option-btn.selected').classList.add('wrong');
                     playSound('sound-wrong');
                     handleWrong();
                 }
-            }, 1000);
+            }, 500);
         }
 
+        // --- TF HANDLING ---
         let tfChoices = [];
         function selectTF(btn, subIdx, val) {
             playSound('sound-ping');
@@ -605,6 +627,7 @@
             }
         }
 
+        // --- SA HANDLING ---
         function checkSA() {
             playSound('sound-ping');
             const val = document.getElementById('sa-input').value.trim().replace('.', ',');
@@ -653,6 +676,7 @@
         function nextQuestion() {
             state.currentQuestionIndex++;
             tfChoices = [];
+            state.selectedMCQIndex = null;
             renderQuestion();
             startTimer();
         }
@@ -701,7 +725,7 @@
             document.getElementById('screen-result').classList.add('hidden-element');
             document.getElementById('screen-login').classList.remove('hidden-element');
             document.getElementById('fireworks-anchor').innerHTML = '';
-            // Do not reset user info
+            // Preserves user info in inputs
         }
 
         function toggleHistory() {
@@ -714,7 +738,7 @@
 
         function renderHistory() {
             const box = document.getElementById('history-box');
-            box.innerHTML = '<h3 class="text-2xl font-bold border-b-2 pb-2 mb-4">LỊCH SỬ LÀM BÀI CHI TIẾT</h3>';
+            box.innerHTML = '<h3 class="text-2xl font-bold border-b-2 pb-2 mb-4 uppercase">LỊCH SỬ LÀM BÀI CHI TIẾT</h3>';
             state.answers.forEach((item, i) => {
                 const div = document.createElement('div');
                 div.className = `p-5 rounded-xl mb-4 border-l-8 ${item.isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500 shadow-sm'}`;
@@ -765,7 +789,7 @@
             document.getElementById('help-audience').style.opacity = '0.3';
             document.getElementById('help-audience').style.pointerEvents = 'none';
             const q = state.currentQuestions[state.currentQuestionIndex];
-            if (q.type === 'MCQ') showModal('Khán giả', 'Khán giả bình chọn cao nhất cho đáp án đúng.');
+            if (q.type === 'MCQ') showModal('Khán giả', 'Phần lớn khán giả bình chọn cho đáp án đúng của câu này.');
             else showHint();
         }
 
