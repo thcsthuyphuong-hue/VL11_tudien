@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ai Là Triệu Phú - Tụ điện Vật lí 11</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -218,14 +230,14 @@
         <!-- Result Screen -->
         <div id="screen-result" class="hidden-element bg-white text-black p-8 rounded-2xl max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
             <div id="celebration-container" class="relative text-center">
-                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2">KẾT QUẢ PHẦN THI</h2>
+                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2 uppercase">Kết quả phần thi</h2>
                 <p id="result-text" class="text-lg mb-6">Bạn đã hoàn thành phần thi.</p>
                 <div id="fireworks-anchor"></div>
             </div>
 
             <div class="flex gap-4 mb-6 justify-center">
-                <button onclick="restartGame()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition cursor-pointer uppercase">Làm lại</button>
-                <button onclick="toggleHistory()" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-700 transition cursor-pointer uppercase">Lịch sử làm bài</button>
+                <button onclick="restartGame()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition cursor-pointer uppercase shadow-lg border-2 border-blue-400">Luyện tập lại</button>
+                <button onclick="toggleHistory()" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-700 transition cursor-pointer uppercase shadow-lg border-2 border-gray-400">Lịch sử làm bài</button>
             </div>
 
             <div id="history-box" class="hidden-element space-y-6 text-sm text-left border-t pt-6">
@@ -235,7 +247,7 @@
 
     </main>
 
-    <!-- Modal for messages - MOVED TO END FOR STACKING -->
+    <!-- Modal for messages -->
     <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[9999] hidden-element pointer-events-auto">
         <div id="modal-content" class="bg-white text-black p-8 rounded-2xl max-w-md w-full text-center shadow-2xl pointer-events-auto">
             <h3 id="modal-title" class="text-2xl font-bold mb-4 text-red-600 uppercase">Thông báo</h3>
@@ -376,6 +388,12 @@
             }
         }
 
+        function triggerMathJax() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch(err => console.error(err));
+            }
+        }
+
         function showModal(title, body, onConfirm = null) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-body').innerText = body;
@@ -392,6 +410,7 @@
                 okBtn.onclick = closeModal;
             }
             document.getElementById('modal-overlay').classList.remove('hidden-element');
+            triggerMathJax();
         }
 
         function closeModal() {
@@ -526,9 +545,7 @@
                 optionsBox.appendChild(container);
             }
 
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                MathJax.typesetPromise();
-            }
+            triggerMathJax();
         }
 
         function selectMCQ(btn, choice, correct) {
@@ -684,11 +701,15 @@
             document.getElementById('screen-result').classList.add('hidden-element');
             document.getElementById('screen-login').classList.remove('hidden-element');
             document.getElementById('fireworks-anchor').innerHTML = '';
+            // Do not reset user info
         }
 
         function toggleHistory() {
             const h = document.getElementById('history-box');
             h.classList.toggle('hidden-element');
+            if (!h.classList.contains('hidden-element')) {
+                triggerMathJax();
+            }
         }
 
         function renderHistory() {
@@ -705,6 +726,7 @@
                 `;
                 box.appendChild(div);
             });
+            triggerMathJax();
         }
 
         function resetHelpsUI() {
@@ -753,6 +775,7 @@
             const hintText = document.getElementById('hint-text');
             hintText.innerHTML = q.hint || q.explain;
             hintBox.classList.remove('hidden-element');
+            triggerMathJax();
         }
 
         const handleViolation = () => {
