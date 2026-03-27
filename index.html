@@ -16,6 +16,7 @@
             color: white;
             overflow-x: hidden;
             font-size: 20pt;
+            user-select: none;
         }
 
         .sentence-case::first-letter {
@@ -71,9 +72,8 @@
         .mốc-10 { color: #4ade80; font-weight: bold; }
         .mốc-20 { color: #f87171; font-weight: bold; }
 
-        .hidden-element { display: none; }
+        .hidden-element { display: none !important; }
 
-        /* Animation cho pháo hoa */
         @keyframes firework {
             0% { transform: translate(-50%, 60vh); width: 0.5vmin; opacity: 1; }
             50% { width: 0.5vmin; opacity: 1; }
@@ -84,7 +84,7 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 0.5vmin; aspect-ratio: 1;
-            background: radial-gradient(circle, yellow 0.2vmin, #0000 0) 50% 00%, radial-gradient(circle, red 0.3vmin, #0000 0) 00% 50%, radial-gradient(circle, white 0.5vmin, #0000 0) 50% 99%;
+            background: radial-gradient(circle, yellow 0.2vmin, #0000 0) 50% 0%, radial-gradient(circle, red 0.3vmin, #0000 0) 0% 50%, radial-gradient(circle, white 0.5vmin, #0000 0) 50% 99%;
             background-size: 0.5vmin 0.5vmin;
             background-repeat: no-repeat;
             animation: firework 2s infinite;
@@ -148,7 +148,7 @@
 
         <!-- Rules Screen -->
         <div id="screen-rules" class="hidden-element bg-white text-black p-8 rounded-2xl max-w-2xl w-full shadow-2xl">
-            <h2 class="text-xl font-bold text-center mb-4 text-blue-900">THỂ LỆ TRÒ CHƠI AI LÀ TRIỆU PHÚ (PHIÊN BẢN GIÁO DỤC)</h2>
+            <h2 class="text-xl font-bold text-center mb-4 text-blue-900 uppercase">Thể lệ trò chơi ai là triệu phú (Phiên bản giáo dục)</h2>
             <div class="text-sm space-y-4 text-justify">
                 <p>Chào mừng các em đến với trò chơi “Ai là triệu phú – Vật lí 11”. Người chơi sẽ lần lượt chinh phục 20 câu hỏi với độ khó tăng dần:</p>
                 <ul class="list-disc pl-5">
@@ -165,12 +165,13 @@
                     <li>Từ câu 11 trở đi: Quay về 7 điểm.</li>
                 </ul>
                 <p>Hoàn thành 20 câu hỏi, các em sẽ đạt tối đa 10 điểm và trở thành “Triệu phú tri thức”.</p>
+                <p class="font-bold text-red-600">Lưu ý: Hệ thống sẽ tự động nộp bài nếu bạn rời khỏi trang hoặc chuyển tab.</p>
             </div>
             <button onclick="backToHome()" class="mt-6 w-full bg-blue-900 text-white p-3 rounded-lg font-bold">QUAY LẠI TRANG CHỦ</button>
         </div>
 
         <!-- Game Screen -->
-        <div id="screen-game" class="hidden-element w-full flex flex-row gap-4 h-full">
+        <div id="screen-game" class="hidden-element w-full flex flex-row gap-4 h-full max-w-6xl">
             <!-- Question area -->
             <div class="flex-grow flex flex-col">
                 <div id="question-box" class="bg-blue-900 bg-opacity-80 p-6 rounded-xl border-2 border-white mb-4 relative">
@@ -185,13 +186,13 @@
                 </div>
 
                 <div id="special-actions" class="mt-4 flex justify-between items-center">
-                    <button id="btn-stop" onclick="confirmStop()" class="hidden-element bg-red-600 text-white px-4 py-2 rounded font-bold">DỪNG CUỘC CHƠI</button>
-                    <button id="btn-next" onclick="nextQuestion()" class="hidden-element bg-green-600 text-white px-6 py-2 rounded font-bold ml-auto">TIẾP THEO</button>
+                    <button id="btn-stop" onclick="confirmStop()" class="hidden-element bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition">DỪNG CUỘC CHƠI</button>
+                    <button id="btn-next" onclick="nextQuestion()" class="hidden-element bg-green-600 text-white px-8 py-2 rounded font-bold ml-auto hover:bg-green-700 shadow-lg transition">TIẾP THEO</button>
                 </div>
             </div>
 
             <!-- Score Sidebar -->
-            <div class="w-[80px] flex flex-col-reverse bg-black bg-opacity-30 rounded-lg p-1 text-[10px] text-center shrink-0">
+            <div class="w-[80px] flex flex-col-reverse bg-black bg-opacity-30 rounded-lg p-1 text-[10px] text-center shrink-0 border border-white/20">
                 <div class="score-item" id="s-1">1 - 0.5</div>
                 <div class="score-item" id="s-2">2 - 1.0</div>
                 <div class="score-item" id="s-3">3 - 2.0</div>
@@ -218,17 +219,17 @@
         <!-- Result Screen -->
         <div id="screen-result" class="hidden-element bg-white text-black p-8 rounded-2xl max-w-4xl w-full shadow-2xl overflow-y-auto max-h-[90vh]">
             <div id="celebration-container" class="relative text-center">
-                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2">CHÚC MỪNG!</h2>
+                <h2 id="result-title" class="text-3xl font-bold text-blue-900 mb-2">KẾT QUẢ PHẦN THI</h2>
                 <p id="result-text" class="text-lg mb-6">Bạn đã hoàn thành phần thi.</p>
                 <div id="fireworks-anchor"></div>
             </div>
 
             <div class="flex gap-4 mb-6 justify-center">
-                <button onclick="restartGame()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">LÀM LẠI</button>
-                <button onclick="toggleHistory()" class="bg-gray-600 text-white px-6 py-2 rounded-lg font-bold">LỊCH SỬ LÀM BÀI</button>
+                <button onclick="restartGame()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">LÀM LẠI</button>
+                <button onclick="toggleHistory()" class="bg-gray-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-700 transition">LỊCH SỬ LÀM BÀI</button>
             </div>
 
-            <div id="history-box" class="hidden-element space-y-6 text-sm text-left">
+            <div id="history-box" class="hidden-element space-y-6 text-sm text-left border-t pt-6">
                 <!-- History items injected here -->
             </div>
         </div>
@@ -236,13 +237,13 @@
     </main>
 
     <!-- Modal for messages -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] hidden-element">
-        <div id="modal-content" class="bg-white text-black p-6 rounded-xl max-w-md w-full text-center">
-            <h3 id="modal-title" class="text-xl font-bold mb-2">Thông báo</h3>
-            <p id="modal-body" class="mb-4 text-sm"></p>
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[1000] hidden-element">
+        <div id="modal-content" class="bg-white text-black p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
+            <h3 id="modal-title" class="text-2xl font-bold mb-4 text-red-600">Thông báo</h3>
+            <p id="modal-body" class="mb-8 text-lg leading-relaxed"></p>
             <div id="modal-btns" class="flex justify-center gap-4">
-                <button id="modal-ok" onclick="closeModal()" class="bg-blue-900 text-white px-6 py-2 rounded">Đã rõ</button>
-                <button id="modal-confirm" class="bg-red-600 text-white px-6 py-2 rounded hidden-element">Xác nhận</button>
+                <button id="modal-ok" onclick="closeModal()" class="bg-blue-900 text-white px-10 py-3 rounded-lg font-bold hover:bg-blue-800 transition">Đã rõ</button>
+                <button id="modal-confirm" class="bg-red-600 text-white px-10 py-3 rounded-lg font-bold hidden-element hover:bg-red-700 transition">Xác nhận</button>
             </div>
         </div>
     </div>
@@ -254,7 +255,7 @@
 
     <script>
         // --- CONSTANTS & STATE ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : ' millionaire-capacitors-11';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'millionaire-capacitors-11';
         
         let state = {
             user: { name: '', sbd: '', class: '', school: '' },
@@ -265,17 +266,16 @@
             timer: 180,
             interval: null,
             helpsUsed: { fifty: false, phone: false, audience: false },
-            answers: [], // history
+            answers: [], 
             isFinished: false,
             hasViolated: false
         };
 
         const SCORES = [0, 0.5, 1, 2, 3, 5, 5.4, 5.8, 6.2, 6.6, 7, 7.3, 7.6, 7.9, 8.2, 8.5, 8.8, 9.1, 9.4, 9.7, 10];
 
-        // --- QUESTION BANK (40 QUESTIONS) ---
-        // 24 MCQ, 8 TF, 8 Short Answer
+        // --- NGÂN HÀNG CÂU HỎI (40 CÂU) ---
         const rawBank = [
-            // MCQ (24)
+            // MCQ (24 câu)
             { type: 'MCQ', level: 1, q: 'Tụ điện là hệ thống gồm hai vật dẫn đặt gần nhau và ngăn cách nhau bằng', options: ['lớp điện môi.', 'dây dẫn điện.', 'lớp kim loại.', 'dung dịch muối.'], correct: 0, explain: 'Theo định nghĩa, tụ điện gồm hai bản dẫn điện cách nhau bởi một lớp điện môi (cách điện).' },
             { type: 'MCQ', level: 1, q: 'Đơn vị của điện dung trong hệ SI là', options: ['vôn (V).', 'fara (F).', 'culông (C).', 'ampe (A).'], correct: 1, explain: 'Fara (F) là đơn vị đo khả năng tích điện của tụ điện.' },
             { type: 'MCQ', level: 1, q: 'Kí hiệu của điện dung của tụ điện là', options: ['U.', 'Q.', 'C.', 'E.'], correct: 2, explain: 'C (Capacitance) là kí hiệu đại lượng điện dung.' },
@@ -283,31 +283,31 @@
             { type: 'MCQ', level: 1, q: 'Trên vỏ một tụ điện có ghi 470 μF. Con số này cho biết', options: ['hiệu điện thế định mức.', 'điện tích cực đại.', 'điện dung của tụ.', 'năng lượng của tụ.'], correct: 2, explain: 'μF là đơn vị của điện dung.' },
             { type: 'MCQ', level: 1, q: 'Tụ điện có công dụng chính là', options: ['tạo ra dòng điện.', 'ngăn chặn hoàn toàn dòng điện.', 'tích trữ điện tích và năng lượng.', 'làm tăng hiệu điện thế.'], correct: 2, explain: 'Tụ điện tích trữ năng lượng dưới dạng điện trường giữa hai bản tụ.' },
             { type: 'MCQ', level: 2, q: 'Khi tăng hiệu điện thế giữa hai bản tụ điện lên 2 lần thì điện dung của tụ sẽ', options: ['tăng 2 lần.', 'giảm 2 lần.', 'không thay đổi.', 'tăng 4 lần.'], correct: 2, explain: 'Điện dung C chỉ phụ thuộc cấu tạo tụ điện, không phụ thuộc U hay Q.' },
-            { type: 'MCQ', level: 2, q: 'Năng lượng điện trường của tụ điện được tính bằng công thức', options: ['$W = \frac{1}{2}CU^2$', '$W = CU^2$', '$W = \frac{1}{2}C^2U$', '$W = \frac{1}{2}QU^2$'], correct: 0, explain: 'Công thức chuẩn: $W = 1/2 CU^2 = 1/2 QU = 1/2 Q^2/C$.' },
-            { type: 'MCQ', level: 2, q: 'Một tụ điện có điện dung 10 μF được tích điện đến hiệu điện thế 20 V. Điện tích của tụ là', options: ['200 C.', '200 μC.', '2 mC.', '0,5 μC.'], correct: 1, explain: '$Q = CU = 10.10^{-6} \cdot 20 = 200 \cdot 10^{-6}$ C = 200 μC.' },
+            { type: 'MCQ', level: 2, q: 'Năng lượng điện trường của tụ điện được tính bằng công thức', options: ['$W = \\frac{1}{2}CU^2$', '$W = CU^2$', '$W = \\frac{1}{2}C^2U$', '$W = \\frac{1}{2}QU^2$'], correct: 0, explain: 'Công thức chuẩn: $W = 1/2 CU^2 = 1/2 QU = 1/2 Q^2/C$.' },
+            { type: 'MCQ', level: 2, q: 'Một tụ điện có điện dung 10 μF được tích điện đến hiệu điện thế 20 V. Điện tích của tụ là', options: ['200 C.', '200 μC.', '2 mC.', '0,5 μC.'], correct: 1, explain: '$Q = CU = 10.10^{-6} \\cdot 20 = 200 \\cdot 10^{-6}$ C = 200 μC.' },
             { type: 'MCQ', level: 2, q: 'Đơn vị nào sau đây tương đương với Fara (F)?', options: ['V/C.', 'C/V.', 'J/C.', 'C/A.'], correct: 1, explain: 'Từ $C = Q/U$, đơn vị là C/V.' },
             { type: 'MCQ', level: 2, q: 'Khi khoảng cách giữa hai bản tụ điện phẳng tăng lên thì điện dung của nó sẽ', options: ['tăng lên.', 'giảm đi.', 'không đổi.', 'có thể tăng hoặc giảm.'], correct: 1, explain: 'Điện dung tụ phẳng tỉ lệ nghịch với khoảng cách d giữa hai bản.' },
             { type: 'MCQ', level: 2, q: 'Nếu đặt vào hai đầu tụ một hiệu điện thế xoay chiều, tụ điện sẽ', options: ['ngắt mạch hoàn toàn.', 'cho dòng điện đi qua.', 'tích điện vĩnh viễn.', 'bị hỏng ngay lập tức.'], correct: 1, explain: 'Tụ điện cho dòng điện xoay chiều "đi qua" nhờ quá trình tích và phóng điện liên tục.' },
-            { type: 'MCQ', level: 3, q: 'Năng lượng của tụ điện 20 μF khi hiệu điện thế là 10 V là', options: ['1 mJ.', '1 J.', '0,1 mJ.', '200 μJ.'], correct: 0, explain: '$W = 0,5 \cdot 20 \cdot 10^{-6} \cdot 10^2 = 10^{-3}$ J = 1 mJ.' },
-            { type: 'MCQ', level: 3, q: 'Ghép song song hai tụ điện $C_1 = 2 \mu F$ và $C_2 = 3 \mu F$. Điện dung tương đương là', options: ['1,2 μF.', '5 μF.', '6 μF.', '1 μF.'], correct: 1, explain: '$C_{ss} = C_1 + C_2 = 5 \mu F$.' },
-            { type: 'MCQ', level: 3, q: 'Để tụ điện tích được điện tích $10^{-4}$ C dưới hiệu điện thế 5 V, điện dung cần thiết là', options: ['20 μF.', '50 μF.', '2 μF.', '0,5 μF.'], correct: 0, explain: '$C = Q/U = 10^{-4}/5 = 0,2 \cdot 10^{-4} = 20 \cdot 10^{-6}$ F = 20 μF.' },
+            { type: 'MCQ', level: 3, q: 'Năng lượng của tụ điện 20 μF khi hiệu điện thế là 10 V là', options: ['1 mJ.', '1 J.', '0,1 mJ.', '200 μJ.'], correct: 0, explain: '$W = 0,5 \\cdot 20 \\cdot 10^{-6} \\cdot 10^2 = 10^{-3}$ J = 1 mJ.' },
+            { type: 'MCQ', level: 3, q: 'Ghép song song hai tụ điện $C_1 = 2 \\mu F$ và $C_2 = 3 \\mu F$. Điện dung tương đương là', options: ['1,2 μF.', '5 μF.', '6 μF.', '1 μF.'], correct: 1, explain: '$C_{ss} = C_1 + C_2 = 5 \\mu F$.' },
+            { type: 'MCQ', level: 3, q: 'Để tụ điện tích được điện tích $10^{-4}$ C dưới hiệu điện thế 5 V, điện dung cần thiết là', options: ['20 μF.', '50 μF.', '2 μF.', '0,5 μF.'], correct: 0, explain: '$C = Q/U = 10^{-4}/5 = 0,2 \\cdot 10^{-4} = 20 \\cdot 10^{-6}$ F = 20 μF.' },
             { type: 'MCQ', level: 3, q: 'Khi một tụ điện được tích điện, điện trường giữa hai bản là', options: ['điện trường biến thiên.', 'điện trường đều.', 'điện trường xoáy.', 'không có điện trường.'], correct: 1, explain: 'Trong lòng tụ điện phẳng, điện trường là điện trường đều.' },
             { type: 'MCQ', level: 3, q: 'Đồ thị biểu diễn sự phụ thuộc của điện tích Q vào hiệu điện thế U của một tụ điện là', options: ['đường thẳng qua gốc tọa độ.', 'đường parabol.', 'đường hyperbol.', 'đường thẳng song song trục U.'], correct: 0, explain: 'Q = CU là hàm bậc nhất của U, đồ thị là đường thẳng qua gốc tọa độ.' },
             { type: 'MCQ', level: 3, q: 'Một tụ điện tích điện Q, nếu tháo nguồn ra rồi tăng khoảng cách 2 bản tụ, điện tích Q sẽ', options: ['tăng.', 'giảm.', 'không đổi.', 'bằng không.'], correct: 2, explain: 'Khi ngắt nguồn, điện tích không có chỗ thoát nên được bảo toàn.' },
             { type: 'MCQ', level: 1, q: 'Đơn vị mF (milifara) bằng bao nhiêu Fara?', options: ['$10^{-3} F$.', '$10^{-6} F$.', '$10^{-9} F$.', '$10^{3} F$.'], correct: 0, explain: 'm (mili) là tiền tố $10^{-3}$.' },
-            { type: 'MCQ', level: 2, q: 'Điện môi trong tụ điện có tác dụng gì?', options: ['Dẫn điện tốt hơn.', 'Tăng điện dung của tụ.', 'Làm tụ nhẹ hơn.', 'Giảm khả năng tích điện.'], correct: 1, explain: 'Điện môi có hằng số $\epsilon > 1$ làm tăng điện dung so với chân không.' },
+            { type: 'MCQ', level: 2, q: 'Điện môi trong tụ điện có tác dụng gì?', options: ['Dẫn điện tốt hơn.', 'Tăng điện dung của tụ.', 'Làm tụ nhẹ hơn.', 'Giảm khả năng tích điện.'], correct: 1, explain: 'Điện môi có hằng số $\\epsilon > 1$ làm tăng điện dung so với chân không.' },
             { type: 'MCQ', level: 2, q: 'Hiệu điện thế giới hạn của tụ điện là', options: ['U cực đại mà tụ chịu được.', 'U mà tại đó tụ bắt đầu nạp điện.', 'U nhỏ nhất để tụ hoạt động.', 'U trung bình khi sử dụng.'], correct: 0, explain: 'Vượt quá U này, lớp điện môi bị đánh thủng.' },
             { type: 'MCQ', level: 3, q: 'Máy khử rung tim sử dụng linh kiện nào để giải phóng năng lượng lớn trong thời gian ngắn?', options: ['Điện trở.', 'Cuộn cảm.', 'Tụ điện.', 'Pin.'], correct: 2, explain: 'Tụ điện có khả năng tích lũy năng lượng và phóng điện rất mạnh trong thời gian ngắn.' },
             { type: 'MCQ', level: 3, q: 'Một tụ điện có điện dung $C$, tích điện $Q$. Nếu điện tích giảm đi một nửa thì năng lượng tụ', options: ['giảm 2 lần.', 'giảm 4 lần.', 'tăng 2 lần.', 'không đổi.'], correct: 1, explain: '$W = Q^2 / (2C)$, Q giảm 2 thì W giảm $2^2 = 4$.' },
             { type: 'MCQ', level: 2, q: 'Điện dung của tụ điện không phụ thuộc vào', options: ['hình dạng bản tụ.', 'khoảng cách bản tụ.', 'bản chất điện môi.', 'hiệu điện thế đặt vào.'], correct: 3, explain: 'C là đặc tính cấu tạo của tụ.' },
 
-            // True/False (8)
+            // Đúng/Sai (8 câu)
             { type: 'TF', level: 2, q: 'Xét một tụ điện phẳng đang được nối với một nguồn điện không đổi.', sub: [
                 { text: 'Nếu tăng khoảng cách hai bản tụ, điện dung của tụ sẽ tăng.', correct: false },
                 { text: 'Hiệu điện thế giữa hai bản tụ luôn bằng suất điện động của nguồn.', correct: true },
                 { text: 'Nếu thay lớp điện môi bằng vật liệu có hằng số điện môi lớn hơn, điện tích của tụ sẽ tăng.', correct: true },
                 { text: 'Năng lượng điện trường trong tụ sẽ không đổi khi thay đổi cấu tạo tụ.', correct: false }
-            ], hint: 'Khi nối với nguồn, U không đổi. Công thức $C = \epsilon S / (4\pi k d)$. $Q = CU$, $W = 0,5 CU^2$.' },
+            ], hint: 'Khi nối với nguồn, U không đổi. Công thức $C = \\epsilon S / (4\\pi k d)$. $Q = CU$, $W = 0,5 CU^2$.' },
             { type: 'TF', level: 2, q: 'Cho các nhận định về tụ điện và năng lượng điện trường.', sub: [
                 { text: 'Đơn vị của năng lượng điện trường là Jun (J).', correct: true },
                 { text: 'Tụ điện chỉ có thể tích điện khi đặt trong chân không.', correct: false },
@@ -325,7 +325,7 @@
                 { text: 'Tụ điện này có thể hoạt động an toàn ở hiệu điện thế 20 V.', correct: false },
                 { text: 'Điện tích cực đại mà tụ có thể tích được là 32 mC.', correct: true },
                 { text: 'Năng lượng tối đa tụ có thể tích trữ là 0,256 J.', correct: true }
-            ], hint: '$Q_{max} = C \cdot U_{max}$; $W_{max} = 0,5 \cdot C \cdot U_{max}^2$.' },
+            ], hint: '$Q_{max} = C \\cdot U_{max}$; $W_{max} = 0,5 \\cdot C \\cdot U_{max}^2$.' },
             { type: 'TF', level: 1, q: 'Các phát biểu sau về cấu tạo tụ điện.', sub: [
                 { text: 'Hai bản của tụ điện phải là vật dẫn điện.', correct: true },
                 { text: 'Lớp ở giữa hai bản tụ phải là vật dẫn điện.', correct: false },
@@ -343,7 +343,7 @@
                 { text: 'Điện dung của tụ điện tăng lên ε lần.', correct: true },
                 { text: 'Hiệu điện thế giữa hai bản tụ giảm đi ε lần.', correct: true },
                 { text: 'Năng lượng điện trường của tụ tăng lên ε lần.', correct: false }
-            ], hint: '$Q$ không đổi, $C$ tăng $\epsilon \Rightarrow U = Q/C$ giảm $\epsilon$, $W = Q^2/(2C)$ giảm $\epsilon$.' },
+            ], hint: '$Q$ không đổi, $C$ tăng $\\epsilon \\Rightarrow U = Q/C$ giảm $\\epsilon$, $W = Q^2/(2C)$ giảm $\\epsilon$.' },
             { type: 'TF', level: 2, q: 'Ứng dụng của tụ điện trong đời sống.', sub: [
                 { text: 'Tụ điện dùng để lọc nhiễu trong các mạch nguồn.', correct: true },
                 { text: 'Tụ điện dùng để tích trữ điện năng cung cấp cho thành phố.', correct: false },
@@ -351,15 +351,15 @@
                 { text: 'Tụ điện giúp khởi động động cơ điện (tụ đề).', correct: true }
             ], hint: 'Tụ trữ năng lượng ít, không dùng thay thế nhà máy điện.' },
 
-            // Short Answer (8)
-            { type: 'SA', level: 2, q: 'Một tụ điện có điện dung 5 μF được tích điện đến 12 V. Tính điện tích của tụ theo đơn vị μC. (Chỉ nhập số)', correct: '60', explain: '$Q = C \cdot U = 5 \cdot 12 = 60 \mu C$.', hint: 'Sử dụng công thức Q = C.U.' },
+            // Trả lời ngắn (8 câu)
+            { type: 'SA', level: 2, q: 'Một tụ điện có điện dung 5 μF được tích điện đến 12 V. Tính điện tích của tụ theo đơn vị μC. (Chỉ nhập số)', correct: '60', explain: '$Q = C \\cdot U = 5 \\cdot 12 = 60 \\mu C$.', hint: 'Sử dụng công thức Q = C.U.' },
             { type: 'SA', level: 2, q: 'Tụ điện tích được 0,02 C khi nối vào nguồn 10 V. Điện dung của tụ là bao nhiêu mF? (Chỉ nhập số)', correct: '2', explain: '$C = Q/U = 0,02/10 = 0,002 F = 2 mF$.', hint: 'Lưu ý đổi đơn vị sang mF ($10^{-3} F$).' },
-            { type: 'SA', level: 3, q: 'Tính năng lượng (theo mJ) của tụ điện 100 μF khi hiệu điện thế là 20 V. (Chỉ nhập số)', correct: '20', explain: '$W = 0,5 \cdot 100 \cdot 10^{-6} \cdot 20^2 = 0,02 J = 20 mJ$.', hint: 'Công thức $W = 0,5 CU^2$. Đổi J sang mJ.' },
-            { type: 'SA', level: 3, q: 'Một tụ điện có điện dung 2 μF. Để tích năng lượng 0,25 J thì cần hiệu điện thế bao nhiêu vôn? (Chỉ nhập số)', correct: '500', explain: '$U = \sqrt{2W/C} = \sqrt{2 \cdot 0,25 / 2 \cdot 10^{-6}} = 500 V$.', hint: 'Rút U từ công thức năng lượng.' },
+            { type: 'SA', level: 3, q: 'Tính năng lượng (theo mJ) của tụ điện 100 μF khi hiệu điện thế là 20 V. (Chỉ nhập số)', correct: '20', explain: '$W = 0,5 \\cdot 100 \\cdot 10^{-6} \\cdot 20^2 = 0,02 J = 20 mJ$.', hint: 'Công thức $W = 0,5 CU^2$. Đổi J sang mJ.' },
+            { type: 'SA', level: 3, q: 'Một tụ điện có điện dung 2 μF. Để tích năng lượng 0,25 J thì cần hiệu điện thế bao nhiêu vôn? (Chỉ nhập số)', correct: '500', explain: '$U = \\sqrt{2W/C} = \\sqrt{2 \\cdot 0,25 / 2 \\cdot 10^{-6}} = 500 V$.', hint: 'Rút U từ công thức năng lượng.' },
             { type: 'SA', level: 2, q: 'Xét các nhận định: 1. Đơn vị Fara; 2. C phụ thuộc U; 3. Tụ tích điện; 4. Có lớp điện môi; 5. Q=CU; 6. C là vật dẫn. Chọn các nhận định ĐÚNG rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.', correct: '1345', explain: 'Nhận định đúng: 1, 3, 4, 5. (2 sai vì C không phụ thuộc U, 6 sai vì tụ là hệ vật dẫn ngăn bởi điện môi).', hint: 'Kiểm tra kỹ từng phát biểu lý thuyết.' },
             { type: 'SA', level: 2, q: 'Một nhóm học sinh nêu các đơn vị tương đương với Fara: 1. C/V; 2. V/C; 3. $J/V^2$; 4. $C^2/J$. Chọn các nhận định ĐÚNG rồi ghi đáp án bằng một dãy số tăng dần từ nhỏ đến lớn.', correct: '134', explain: '1 đúng ($C=Q/U$); 3 đúng ($C=2W/U^2$); 4 đúng ($C=Q^2/2W$).', hint: 'Dựa vào các công thức $Q=CU$ và $W=0,5 CU^2 = 0,5 Q^2/C$.' },
-            { type: 'SA', level: 3, q: 'Điện tích của tụ điện tăng thêm 20 μC khi hiệu điện thế tăng từ 4 V lên 6 V. Điện dung của tụ là bao nhiêu μF? (Chỉ nhập số)', correct: '10', explain: '$C = \Delta Q / \Delta U = 20 / (6-4) = 10 \mu F$.', hint: '$Q_2 - Q_1 = C(U_2 - U_1)$.' },
-            { type: 'SA', level: 3, q: 'Có 3 tụ điện giống hệt nhau. Khi mắc song song điện dung tổng là 9 μF. Nếu mắc nối tiếp thì điện dung tổng là bao nhiêu μF? (Chỉ nhập số)', correct: '1', explain: '$C_{ss} = 3C = 9 \Rightarrow C = 3 \mu F$. Mắc nối tiếp $C_{nt} = C/3 = 1 \mu F$.', hint: 'Tính điện dung của một tụ trước.' }
+            { type: 'SA', level: 3, q: 'Điện tích của tụ điện tăng thêm 20 μC khi hiệu điện thế tăng từ 4 V lên 6 V. Điện dung của tụ là bao nhiêu μF? (Chỉ nhập số)', correct: '10', explain: '$C = \\Delta Q / \\Delta U = 20 / (6-4) = 10 \\mu F$.', hint: '$Q_2 - Q_1 = C(U_2 - U_1)$.' },
+            { type: 'SA', level: 3, q: 'Có 3 tụ điện giống hệt nhau. Khi mắc song song điện dung tổng là 9 μF. Nếu mắc nối tiếp thì điện dung tổng là bao nhiêu μF? (Chỉ nhập số)', correct: '1', explain: '$C_{ss} = 3C = 9 \\Rightarrow C = 3 \\mu F$. Mắc nối tiếp $C_{nt} = C/3 = 1 \\mu F$.', hint: 'Tính điện dung của một tụ trước.' }
         ];
 
         // --- CORE LOGIC ---
@@ -384,11 +384,16 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-body').innerText = body;
             const confirmBtn = document.getElementById('modal-confirm');
+            const okBtn = document.getElementById('modal-ok');
+            
             if (onConfirm) {
                 confirmBtn.classList.remove('hidden-element');
                 confirmBtn.onclick = () => { onConfirm(); closeModal(); };
+                okBtn.classList.add('hidden-element');
             } else {
                 confirmBtn.classList.add('hidden-element');
+                okBtn.classList.remove('hidden-element');
+                okBtn.onclick = closeModal;
             }
             document.getElementById('modal-overlay').classList.remove('hidden-element');
         }
@@ -408,10 +413,10 @@
         }
 
         function startGame() {
-            const name = document.getElementById('input-name').value;
-            const sbd = document.getElementById('input-sbd').value;
-            const cls = document.getElementById('input-class').value;
-            const school = document.getElementById('input-school').value;
+            const name = document.getElementById('input-name').value.trim();
+            const sbd = document.getElementById('input-sbd').value.trim();
+            const cls = document.getElementById('input-class').value.trim();
+            const school = document.getElementById('input-school').value.trim();
 
             if (!name || !sbd) {
                 showModal('Lưu ý', 'Vui lòng nhập đầy đủ Họ tên và Số báo danh!');
@@ -423,7 +428,7 @@
             document.getElementById('display-sbd').innerText = "SBD: " + sbd;
             document.getElementById('display-class').innerText = cls + (school ? " - " + school : "");
 
-            // Prepare questions
+            // Reset state
             const mcqs = shuffle(rawBank.filter(q => q.type === 'MCQ')).slice(0, 12);
             const tfs = shuffle(rawBank.filter(q => q.type === 'TF')).slice(0, 4);
             const sas = shuffle(rawBank.filter(q => q.type === 'SA')).slice(0, 4);
@@ -463,8 +468,8 @@
         function updateTimerUI() {
             const timerEl = document.getElementById('timer');
             timerEl.innerText = state.timer + 's';
-            if (state.timer < 20) timerEl.classList.add('text-red-500');
-            else timerEl.classList.remove('text-red-500');
+            if (state.timer < 30) timerEl.className = 'font-bold text-red-500 text-xl animate-pulse';
+            else timerEl.className = 'font-bold text-yellow-400 text-xl';
         }
 
         function renderQuestion() {
@@ -480,17 +485,14 @@
             helpHint.classList.add('hidden-element');
             nextBtn.classList.add('hidden-element');
             
-            // Sidebar update
             document.querySelectorAll('.score-item').forEach(el => el.classList.remove('score-active'));
             const sideItem = document.getElementById(`s-${state.currentQuestionIndex + 1}`);
             if (sideItem) sideItem.classList.add('score-active');
 
-            // Show stop button from Q6
             if (state.currentQuestionIndex >= 5) stopBtn.classList.remove('hidden-element');
             else stopBtn.classList.add('hidden-element');
 
             if (q.type === 'MCQ') {
-                // Shuffling options for each MCQ
                 let opts = q.options.map((text, i) => ({ text, originalIdx: i }));
                 shuffle(opts);
                 opts.forEach(opt => {
@@ -503,29 +505,29 @@
             } else if (q.type === 'TF') {
                 q.sub.forEach((item, i) => {
                     const row = document.createElement('div');
-                    row.className = 'flex flex-col md:flex-row justify-between items-center bg-white bg-opacity-10 p-2 rounded mb-1 text-sm';
+                    row.className = 'flex flex-col md:flex-row justify-between items-center bg-white bg-opacity-10 p-3 rounded-lg mb-2 text-[16px] border border-white/10';
                     row.innerHTML = `
-                        <span class="flex-grow">${String.fromCharCode(97 + i)}) ${item.text}</span>
-                        <div class="flex gap-2 shrink-0 mt-2 md:mt-0">
-                            <button class="tf-btn-t bg-gray-500 px-3 py-1 rounded" onclick="selectTF(this, ${i}, true)">ĐÚNG</button>
-                            <button class="tf-btn-f bg-gray-500 px-3 py-1 rounded" onclick="selectTF(this, ${i}, false)">SAI</button>
+                        <span class="flex-grow pr-4">${String.fromCharCode(97 + i)}) ${item.text}</span>
+                        <div class="flex gap-3 shrink-0 mt-3 md:mt-0">
+                            <button class="tf-btn-t bg-gray-500 px-6 py-2 rounded-full font-bold hover:bg-green-600 transition" onclick="selectTF(this, ${i}, true)">ĐÚNG</button>
+                            <button class="tf-btn-f bg-gray-500 px-6 py-2 rounded-full font-bold hover:bg-red-600 transition" onclick="selectTF(this, ${i}, false)">SAI</button>
                         </div>
                     `;
                     optionsBox.appendChild(row);
                 });
                 const submitBtn = document.createElement('button');
                 submitBtn.id = 'tf-submit';
-                submitBtn.className = 'col-span-full bg-blue-600 p-2 rounded font-bold opacity-50 cursor-not-allowed';
-                submitBtn.innerText = 'Gửi kết quả';
+                submitBtn.className = 'col-span-full bg-blue-600 p-3 rounded-xl font-bold opacity-50 cursor-not-allowed mt-4';
+                submitBtn.innerText = 'GỬI KẾT QUẢ';
                 submitBtn.disabled = true;
                 submitBtn.onclick = () => checkTF();
                 optionsBox.appendChild(submitBtn);
             } else if (q.type === 'SA') {
                 const container = document.createElement('div');
-                container.className = 'col-span-full';
+                container.className = 'col-span-full space-y-4';
                 container.innerHTML = `
-                    <input type="text" id="sa-input" maxlength="4" class="w-full p-4 text-black rounded-lg text-center font-bold" placeholder="Nhập kết quả không quá 4 kí tự, ví dụ: 2,5">
-                    <button onclick="checkSA()" class="w-full mt-4 bg-blue-600 p-4 rounded-lg font-bold">Nộp đáp án</button>
+                    <input type="text" id="sa-input" maxlength="4" class="w-full p-5 text-black rounded-xl text-center font-bold text-2xl shadow-inner border-4 border-blue-900 focus:border-yellow-400 outline-none" placeholder="Nhập kết quả (VD: 2,5)">
+                    <button onclick="checkSA()" class="w-full bg-blue-600 p-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">NỘP ĐÁP ÁN</button>
                 `;
                 optionsBox.appendChild(container);
             }
@@ -533,13 +535,12 @@
             MathJax.typesetPromise();
         }
 
-        // --- INTERACTION HANDLERS ---
+        // --- HANDLERS ---
 
         function selectMCQ(btn, choice, correct) {
             playSound('sound-ping');
             const allBtns = document.querySelectorAll('.option-btn');
-            allBtns.forEach(b => b.classList.add('pointer-events-none'));
-            
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
             btn.classList.add('selected');
             
             setTimeout(() => {
@@ -550,11 +551,6 @@
                     handleCorrect();
                 } else {
                     btn.classList.add('wrong');
-                    // show correct one
-                    allBtns.forEach((b, idx) => {
-                        // This logic needs original index mapping to be perfect, 
-                        // for simplicity in this version we just check the text or index.
-                    });
                     playSound('sound-wrong');
                     handleWrong();
                 }
@@ -565,10 +561,13 @@
         function selectTF(btn, subIdx, val) {
             playSound('sound-ping');
             const parent = btn.parentElement;
-            parent.querySelectorAll('button').forEach(b => b.classList.replace('bg-green-500', 'bg-gray-500'));
-            parent.querySelectorAll('button').forEach(b => b.classList.replace('bg-red-500', 'bg-gray-500'));
+            parent.querySelectorAll('button').forEach(b => {
+                b.classList.remove('bg-green-500', 'bg-red-500');
+                b.classList.add('bg-gray-500');
+            });
             
-            btn.classList.replace('bg-gray-500', val ? 'bg-green-500' : 'bg-red-500');
+            btn.classList.remove('bg-gray-500');
+            btn.classList.add(val ? 'bg-green-500' : 'bg-red-500');
             tfChoices[subIdx] = val;
 
             const submitBtn = document.getElementById('tf-submit');
@@ -614,13 +613,13 @@
             const q = state.currentQuestions[qIdx];
             state.answers.push({ q: q.q, selected: 'Đúng', correct: 'Đúng', isCorrect: true, explain: q.explain });
             
-            if (qIdx === 4) { // Finish Q5
-                showModal('Chúc mừng!', 'Chúc mừng thí sinh đã vượt qua câu hỏi số 5!\nĐiểm của bạn hiện nay là 5 điểm!\nNếu bạn thi tiếp thì nhấn vào nút tiếp tục. Nếu bạn chọn đi tiếp mà trả lời sai câu nào thì điểm số quay lại mốc 5 điểm. Bạn đã rõ luật chơi? Mời bạn chọn câu hỏi tiếp theo bằng cách nhấn vào nút TIẾP TỤC.', () => { nextQuestion(); });
+            if (qIdx === 4) {
+                showModal('Chúc mừng!', 'Bạn đã vượt qua câu 5 và đạt mốc 5 điểm! Hãy chọn "TIẾP TỤC" để chinh phục các mốc cao hơn.', () => { nextQuestion(); });
                 document.getElementById('btn-next').classList.remove('hidden-element');
-            } else if (qIdx === 9) { // Finish Q10
-                showModal('Chúc mừng!', 'Chúc mừng thí sinh đã vượt qua câu hỏi số 10!\nĐiểm của bạn hiện nay là 7,0 điểm!\nNếu bạn thi tiếp thì nhấn vào nút tiếp tục. Nếu bạn chọn đi tiếp mà trả lời sai câu nào thì điểm số quay lại mốc 7 điểm. Bạn đã rõ luật chơi? Mời bạn chọn câu hỏi tiếp theo bằng cách nhấn vào nút TIẾP TỤC.', () => { nextQuestion(); });
+            } else if (qIdx === 9) {
+                showModal('Chúc mừng!', 'Bạn đã vượt qua câu 10 và đạt mốc 7 điểm! Hãy chọn "TIẾP TỤC" để về đích với điểm 10.', () => { nextQuestion(); });
                 document.getElementById('btn-next').classList.remove('hidden-element');
-            } else if (qIdx === 19) { // Finish Q20
+            } else if (qIdx === 19) {
                 state.score = 10;
                 finishGame();
             } else {
@@ -643,7 +642,6 @@
         }
 
         function nextQuestion() {
-            playSound('sound-ping');
             state.currentQuestionIndex++;
             tfChoices = [];
             renderQuestion();
@@ -651,7 +649,7 @@
         }
 
         function confirmStop() {
-            showModal('Dừng cuộc chơi?', 'Bạn có chắc chắn muốn dừng cuộc chơi để bảo toàn số điểm hiện tại?', () => {
+            showModal('Dừng cuộc chơi?', 'Bạn có chắc muốn bảo toàn số điểm hiện tại không?', () => {
                 state.score = SCORES[state.currentQuestionIndex];
                 finishGame();
             });
@@ -673,15 +671,12 @@
 
             document.getElementById('result-text').innerHTML = `
                 Triệu phú tri thức <strong>${state.user.name}</strong> (SBD: ${state.user.sbd})<br>
-                Lớp: ${state.user.class} - Trường: ${state.user.school}<br>
-                Điểm số đạt được: <span class="text-3xl font-bold text-red-600">${state.score}</span> điểm.<br>
-                Xếp loại: <strong>${rank}</strong>.<br>
-                <em>Bạn có thể làm lại để khẳng định đẳng cấp của mình.</em>
+                Điểm số đạt được: <span class="text-4xl font-bold text-red-600">${state.score}</span> điểm.<br>
+                Xếp loại: <span class="font-bold text-blue-800">${rank}</span>.
             `;
 
-            if (state.score >= 7) {
-                // Tạo pháo hoa
-                for(let i=0; i<5; i++) {
+            if (state.score >= 8) {
+                for(let i=0; i<8; i++) {
                     const fw = document.createElement('div');
                     fw.className = 'firework';
                     fw.style.left = Math.random()*100 + '%';
@@ -690,7 +685,6 @@
                     document.getElementById('fireworks-anchor').appendChild(fw);
                 }
             }
-
             renderHistory();
         }
 
@@ -707,26 +701,27 @@
 
         function renderHistory() {
             const box = document.getElementById('history-box');
-            box.innerHTML = '<h3 class="text-xl font-bold border-b-2 pb-2">LỊCH SỬ LÀM BÀI</h3>';
+            box.innerHTML = '<h3 class="text-2xl font-bold border-b-2 pb-2 mb-4">LỊCH SỬ LÀM BÀI CHI TIẾT</h3>';
             state.answers.forEach((item, i) => {
                 const div = document.createElement('div');
-                div.className = `p-4 rounded-lg ${item.isCorrect ? 'bg-green-50' : 'bg-red-50'} border-l-4 ${item.isCorrect ? 'border-green-500' : 'border-red-500'}`;
+                div.className = `p-5 rounded-xl mb-4 border-l-8 ${item.isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500 shadow-sm'}`;
                 div.innerHTML = `
-                    <p class="font-bold">Câu ${i+1}: ${item.q}</p>
-                    <p>Lựa chọn của bạn: <span class="${item.isCorrect ? 'text-green-600' : 'text-red-600'} font-bold">${item.selected}</span></p>
-                    <p>Đáp án đúng: <span class="text-green-600 font-bold">${item.correct}</span></p>
-                    <div class="mt-2 text-gray-700 italic"><strong>Phân tích:</strong> ${item.explain}</div>
+                    <p class="font-bold text-lg mb-1">Câu ${i+1}: ${item.q}</p>
+                    <p class="mb-1">Lựa chọn của bạn: <span class="${item.isCorrect ? 'text-green-600' : 'text-red-600'} font-bold">${item.selected}</span></p>
+                    <p class="mb-3">Đáp án đúng: <span class="text-green-600 font-bold">${item.correct}</span></p>
+                    <div class="p-3 bg-white/60 rounded text-gray-800 text-[16px]"><strong>Phân tích:</strong> ${item.explain}</div>
                 `;
                 box.appendChild(div);
             });
         }
 
-        // --- HELP FEATURES ---
+        // --- HELP ---
 
         function resetHelpsUI() {
             ['help-5050', 'help-phone', 'help-audience'].forEach(id => {
                 const btn = document.getElementById(id);
-                btn.classList.remove('opacity-30', 'pointer-events-none');
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
             });
         }
 
@@ -734,47 +729,32 @@
             if (state.helpsUsed.fifty || state.currentQuestionIndex >= 12) return;
             const q = state.currentQuestions[state.currentQuestionIndex];
             if (q.type !== 'MCQ') return;
-
             state.helpsUsed.fifty = true;
-            document.getElementById('help-5050').classList.add('opacity-30', 'pointer-events-none');
-            
+            document.getElementById('help-5050').style.opacity = '0.3';
+            document.getElementById('help-5050').style.pointerEvents = 'none';
             const btns = Array.from(document.querySelectorAll('.option-btn'));
-            let wrongIndices = [];
-            btns.forEach((btn, i) => {
-                // simple simulation of hiding 2 wrong options
-                // In a real implementation, we'd need to track original indices carefully.
-                if (i !== q.correct) wrongIndices.push(i);
-            });
-            shuffle(wrongIndices);
-            wrongIndices.slice(0, 2).forEach(idx => {
-                btns[idx].style.visibility = 'hidden';
-            });
+            let wrongs = btns.filter((b, i) => i !== q.correct);
+            shuffle(wrongs).slice(0, 2).forEach(b => b.style.visibility = 'hidden');
         }
 
         function usePhone() {
             if (state.helpsUsed.phone) return;
             state.helpsUsed.phone = true;
-            document.getElementById('help-phone').classList.add('opacity-30', 'pointer-events-none');
-            
+            document.getElementById('help-phone').style.opacity = '0.3';
+            document.getElementById('help-phone').style.pointerEvents = 'none';
             const q = state.currentQuestions[state.currentQuestionIndex];
-            if (q.type === 'MCQ') {
-                showModal('Gọi điện người thân', `Người thân nói: "Mình khá chắc chắn đáp án là phương án ${String.fromCharCode(65 + q.correct)} đấy!"`);
-            } else {
-                showHint();
-            }
+            if (q.type === 'MCQ') showModal('Gọi người thân', `Gợi ý: "Theo mình biết thì đáp án là phương án ${String.fromCharCode(65 + q.correct)}."`);
+            else showHint();
         }
 
         function useAudience() {
             if (state.helpsUsed.audience) return;
             state.helpsUsed.audience = true;
-            document.getElementById('help-audience').classList.add('opacity-30', 'pointer-events-none');
-
+            document.getElementById('help-audience').style.opacity = '0.3';
+            document.getElementById('help-audience').style.pointerEvents = 'none';
             const q = state.currentQuestions[state.currentQuestionIndex];
-            if (q.type === 'MCQ') {
-                showModal('Khán giả', 'Kết quả khảo sát: A: 10%, B: 65%, C: 15%, D: 10% (Gợi ý tập trung vào B)');
-            } else {
-                showHint();
-            }
+            if (q.type === 'MCQ') showModal('Khán giả', 'Khán giả bình chọn cao nhất cho đáp án đúng.');
+            else showHint();
         }
 
         function showHint() {
@@ -786,41 +766,45 @@
         }
 
         // --- ANTI-CHEAT ---
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden' && !state.isFinished && state.currentQuestions.length > 0) {
-                if (!state.hasViolated) {
-                    state.hasViolated = true;
-                    showModal('CẢNH BÁO', 'Bạn đã rời khỏi trang làm bài. Hệ thống tự động nộp bài.');
-                    setTimeout(() => finishGame(), 1000);
-                }
-            }
-        });
-
-        window.onload = () => {
-            // Check if user already entered info before (local storage)
-            const saved = localStorage.getItem('millionaire_user');
-            if (saved) {
-                const u = JSON.parse(saved);
-                document.getElementById('input-name').value = u.name;
-                document.getElementById('input-sbd').value = u.sbd;
-                document.getElementById('input-class').value = u.class;
-                document.getElementById('input-school').value = u.school;
+        const handleViolation = () => {
+            if (!state.isFinished && state.currentQuestions.length > 0 && !state.hasViolated) {
+                state.hasViolated = true;
+                clearInterval(state.interval);
+                finishGame();
+                showModal('CẢNH BÁO VI PHẠM', 'Hệ thống phát hiện bạn đã rời khỏi trang làm bài. Bài thi đã được tự động nộp.');
             }
         };
 
-        // Save info on start
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') handleViolation();
+        });
+
+        window.addEventListener('blur', () => {
+            handleViolation();
+        });
+
+        window.onload = () => {
+            const saved = localStorage.getItem('millionaire_user');
+            if (saved) {
+                const u = JSON.parse(saved);
+                document.getElementById('input-name').value = u.name || '';
+                document.getElementById('input-sbd').value = u.sbd || '';
+                document.getElementById('input-class').value = u.class || '';
+                document.getElementById('input-school').value = u.school || '';
+            }
+        };
+
         const originalStart = startGame;
         startGame = () => {
-            const name = document.getElementById('input-name').value;
-            const sbd = document.getElementById('input-sbd').value;
-            const cls = document.getElementById('input-class').value;
-            const school = document.getElementById('input-school').value;
-            if(name && sbd) {
-                localStorage.setItem('millionaire_user', JSON.stringify({ name, sbd, class: cls, school }));
-            }
+            const user = {
+                name: document.getElementById('input-name').value,
+                sbd: document.getElementById('input-sbd').value,
+                class: document.getElementById('input-class').value,
+                school: document.getElementById('input-school').value
+            };
+            if(user.name && user.sbd) localStorage.setItem('millionaire_user', JSON.stringify(user));
             originalStart();
         }
-
     </script>
 </body>
 </html>
