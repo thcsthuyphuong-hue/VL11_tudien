@@ -607,7 +607,6 @@ if (window.db && window.addDoc && window.collection) {
 	<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
   authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
@@ -616,20 +615,16 @@ const firebaseConfig = {
   messagingSenderId: "772223015613",
   appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 window.db = db;
 window.addDoc = addDoc;
 window.collection = collection;
 </script>
-
 <!-- SCRIPT ADMIN -->
 <script>
 function goAdmin() {
     const pass = prompt("Nhập mật khẩu Admin:");
-
     if (pass === "1234@@") {
         window.location.href = "admin.html";
     } else {
@@ -637,7 +632,6 @@ function goAdmin() {
     }
 }
 </script>
-
 <!-- NÚT ADMIN -->
 <a href="#" 
 onclick="goAdmin()"
