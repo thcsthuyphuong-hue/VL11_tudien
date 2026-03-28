@@ -340,7 +340,7 @@
         }
 
         function init() {
-            const saved = localStorage.getItem('altp_user');
+          const saved = sessionStorage.getItem('altp_user');
             if (saved) {
                 const u = JSON.parse(saved);
                 document.getElementById('input-name').value = u.name || "";
@@ -375,7 +375,7 @@
             if (!name || !sbd) return alert("Vui lòng nhập đầy đủ thông tin!");
             
             gameState.user = { name, sbd, class: cls, school: sch };
-            localStorage.setItem('altp_user', JSON.stringify(gameState.user));
+            sessionStorage.setItem('altp_user', JSON.stringify(gameState.user));
             gameState.gameMode = mode;
             gameState.currentLevel = 0;
             gameState.isGameOver = false;
