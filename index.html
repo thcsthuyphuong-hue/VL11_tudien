@@ -340,7 +340,8 @@
         }
 
         function init() {
-          const saved = sessionStorage.getItem('altp_user');
+         localStorage.clear();
+			const saved = sessionStorage.getItem('altp_user');
             if (saved) {
                 const u = JSON.parse(saved);
                 document.getElementById('input-name').value = u.name || "";
