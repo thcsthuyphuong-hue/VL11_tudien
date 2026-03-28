@@ -642,42 +642,42 @@ requestAnimationFrame(animate);
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Xuất hàm ra toàn cục để hàm end() có thể gọi
         window.saveResult = async (data) => {
             try {
-                console.log("🔥 Đang gửi dữ liệu:", data);
-                await addDoc(collection(db, "results"), {
-                    name: data.name || "N/A",
-                    sbd: data.sbd || "N/A",
-                    class: data.class || "N/A",
-                    school: data.school || "N/A",
-                    score: data.score || 0,
-                    duration: data.duration || 0,
-                    submitTime: data.submitTime || new Date().toISOString()
-                });
+                console.log("🔥 Đang gửi dữ liệu lên Firebase...");
+                await addDoc(collection(db, "results"), data);
                 console.log("✅ Lưu Firebase thành công!");
             } catch (e) {
                 console.error("❌ Lỗi Firebase:", e);
             }
         };
-		<script>
+    </script>
+
+    <script>
         function goAdmin() {
-            // Tạo một khung nhập liệu ẩn danh
             const overlay = document.createElement('div');
-            overlay.style = "position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center;";
+            overlay.style = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
             overlay.innerHTML = `
-                <div style="background:white; padding:20px; border-radius:10px; text-align:center; color:black;">
-                    <h3 style="margin-bottom:15px;">Xác thực Admin</h3>
-                    <input type="password" id="admin-pass" placeholder="Nhập mật khẩu..." style="padding:10px; border:1px solid #ccc; border-radius:5px; margin-bottom:15px; width:200px;"><br>
-                    <button id="confirm-btn" style="background:#2ecc71; color:white; padding:8px 20px; border-radius:5px; border:none; cursor:pointer; margin-right:10px;">Xác nhận</button>
-                    <button id="cancel-btn" style="background:#e74c3c; color:white; padding:8px 20px; border-radius:5px; border:none; cursor:pointer;">Hủy</button>
+                <div style="background:white; padding:30px; border-radius:15px; text-align:center; color:black; box-shadow:0 0 20px rgba(0,0,0,0.5); width:300px;">
+                    <h3 style="margin-top:0; color:#1a2a6c;">Xác thực Quyền Admin</h3>
+                    <p style="font-size:14px; color:#666;">Vui lòng nhập mật khẩu quản trị</p>
+                    <input type="password" id="admin-pass" placeholder="Mật khẩu..." style="padding:12px; border:2px solid #ddd; border-radius:8px; margin-bottom:15px; width:100%; box-sizing:border-box; outline:none; text-align:center; font-size:18px;">
+                    <div style="display:flex; gap:10px;">
+                        <button id="confirm-btn" style="flex:1; background:#2ecc71; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-bold:true;">XÁC NHẬN</button>
+                        <button id="cancel-btn" style="flex:1; background:#e74c3c; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer;">HỦY</button>
+                    </div>
                 </div>
             `;
             document.body.appendChild(overlay);
-            document.getElementById('admin-pass').focus();
+            const input = document.getElementById('admin-pass');
+            input.focus();
+
+            // Xử lý sự kiện nhấn Enter
+            input.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('confirm-btn').click(); };
 
             document.getElementById('confirm-btn').onclick = () => {
-                const pass = document.getElementById('admin-pass').value;
-                if (pass === "1234@@") {
+                if (input.value === "1234@@") {
                     window.location.href = "admin.html";
                 } else {
                     alert("Sai mật khẩu!");
@@ -688,9 +688,8 @@ requestAnimationFrame(animate);
         }
     </script>
 
-    <a href="javascript:void(0)" onclick="goAdmin()" style="position:fixed; bottom:10px; right:10px; background:#333; color:white; padding:8px 12px; border-radius:5px; text-decoration:none; z-index:9999;">
+    <a href="javascript:void(0)" onclick="goAdmin()" style="position:fixed; bottom:10px; right:10px; background:rgba(0,0,0,0.5); color:white; padding:8px 15px; border-radius:5px; text-decoration:none; z-index:9999; font-size:12px; border:1px solid rgba(255,255,255,0.2);">
         Admin
     </a>
 </body>
 </html>
-    
