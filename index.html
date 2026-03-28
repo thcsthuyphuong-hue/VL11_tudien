@@ -513,18 +513,18 @@
             if (score >= 5) startFireworks();
         
 		// 🔥 LƯU FIREBASE
-if (window.saveResult) {
-  window.saveResult({
-    name: gameState.user.name,
-    sbd: gameState.user.sbd,
-    class: gameState.user.class,
-    school: gameState.user.school,
-    score: score,
-    duration: 180 - gameState.timer,
-    submitTime: new Date().toISOString()
-  });
+if (typeof window.saveResult === 'function') {
+    window.saveResult({
+        name: gameState.user.name || "N/A",
+        sbd: gameState.user.sbd || "N/A",
+        class: gameState.user.class || "N/A",
+        school: gameState.user.school || "N/A",
+        score: score,
+        duration: 180 - gameState.timer,
+        submitTime: new Date().toISOString()
+    });
 } else {
-  console.error("❌ Firebase chưa load");
+    console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
 }
 		}
         function useLifeline(type) {
@@ -659,9 +659,7 @@ requestAnimationFrame(animate);
                 console.error("❌ Lỗi Firebase:", e);
             }
         };
-    </script>
-
-    <script>
+		<script>
         function goAdmin() {
             const pass = prompt("Nhập mật khẩu Admin:");
             if (pass === "1234@@") {
@@ -677,3 +675,4 @@ requestAnimationFrame(animate);
     </a>
 </body>
 </html>
+    
