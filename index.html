@@ -639,8 +639,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.db = db;
-window.addDoc = addDoc;window.saveResult = async (data) => {
-  try {
+window.addDoc = addDoc;
+window.collection = collection; // ⭐ THÊM DÒNG NÀY
+
+window.saveResult = async (data) => {
+		
     console.log("🔥 DATA GỬI:", data);
 
     await addDoc(collection(db, "results"), {
