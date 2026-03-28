@@ -527,6 +527,7 @@ if (window.db && window.addDoc && window.collection) {
 } else {
   console.error("❌ Firebase chưa sẵn sàng");
 }
+			}
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
@@ -593,13 +594,35 @@ if (window.db && window.addDoc && window.collection) {
             let parts = [];
             function animate() {
                 if (!gameState.isGameOver) return; ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (Math.random() < 0.05) {
-                    const x = Math.random() * canvas.width, y = Math.random() * canvas.height * 0.5;
-                    for(let i=0; i<30; i++) parts.push({x, y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, a:1, c:`hsl(${Math.random()*360}, 100%, 50%)`});
-                }
-                parts.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.a -= 0.01; ctx.globalAlpha = p.a; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 7); ctx.fill(); if(p.a <= 0) parts.splice(i, 1); });
-                requestAnimationFrame(animate);
-            }
+               if (Math.random() < 0.05) {
+  const x = Math.random() * canvas.width;
+  const y = Math.random() * canvas.height * 0.5;
+
+  for (let i = 0; i < 30; i++) {
+    parts.push({
+      x: x,
+      y: y,
+      vx: (Math.random() - 0.5) * 8,
+      vy: (Math.random() - 0.5) * 8,
+      a: 1,
+      c: `hsl(${Math.random()*360},100%,50%)`
+    });
+  }
+}
+               parts.forEach((p, i) => {
+  p.x += p.vx;
+  p.y += p.vy;
+  p.vy += 0.1;
+  p.a -= 0.01;
+
+  ctx.globalAlpha = p.a;
+  ctx.fillStyle = p.c;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+  ctx.fill();
+});
+requestAnimationFrame(animate);
+				            }
             animate();
         }
         window.onload = init;
