@@ -639,11 +639,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.db = db;
-window.addDoc = addDoc;
-window.collection = collection;
-		window.saveResult = async (data) => {
+window.addDoc = addDoc;window.saveResult = async (data) => {
   try {
-    await addDoc(collection(db, "results"), data);
+    console.log("🔥 DATA GỬI:", data);
+
+    await addDoc(collection(db, "results"), {
+      name: data.name || "",
+      sbd: data.sbd || "",
+      class: data.class || "",
+      school: data.school || "",
+      score: data.score || 0,
+      duration: data.duration || 0,
+      submitTime: data.submitTime || new Date().toISOString()
+    });
+
     console.log("✅ Đã lưu Firebase");
   } catch (e) {
     console.error("❌ Lỗi Firebase:", e);
