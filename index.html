@@ -512,8 +512,8 @@
             if (score >= 5) startFireworks();
         
 		// 🔥 LƯU FIREBASE
-if (db && addDoc && collection) {
-  addDoc(collection(db, "results"), {
+if (window.db && window.addDoc && window.collection) {
+  window.addDoc(window.collection(window.db, "results"), {
     name: gameState.user.name,
     sbd: gameState.user.sbd,
     class: gameState.user.class,
