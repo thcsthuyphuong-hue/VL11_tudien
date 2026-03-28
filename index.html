@@ -626,60 +626,53 @@ requestAnimationFrame(animate);
         window.onload = init;
     </script>
 	<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
-    authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
-    projectId: "game-vat-ly-9-924bc",
-    storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
-    messagingSenderId: "772223015613",
-    appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
+            authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
+            projectId: "game-vat-ly-9-924bc",
+            storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
+            messagingSenderId: "772223015613",
+            appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
+        };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-  // Hàm lưu kết quả lên Firebase
-  window.saveResult = async (data) => {
-    try {
-      console.log("🔥 Đang gửi dữ liệu lên Firebase:", data);
-      await addDoc(collection(db, "results"), {
-        name: data.name || "N/A",
-        sbd: data.sbd || "N/A",
-        class: data.class || "N/A",
-        school: data.school || "N/A",
-        score: data.score || 0,
-        duration: data.duration || 0,
-        submitTime: data.submitTime || new Date().toISOString()
-      });
-      console.log("✅ Đã lưu Firebase thành công!");
-    } catch (e) {
-      console.error("❌ Lỗi Firebase:", e);
-      alert("Lỗi kết nối cơ sở dữ liệu: " + e.message);
-    }
-  };
-</script>
-</script>
-<!-- SCRIPT ADMIN -->
-<script>
-function goAdmin() {
-    const pass = prompt("Nhập mật khẩu Admin:");
-    if (pass === "1234@@") {
-        window.location.href = "admin.html";
-    } else {
-        alert("Sai mật khẩu!");
-    }
-}
-</script>
-<!-- NÚT ADMIN -->
-<a href="#" 
-onclick="goAdmin()"
-style="position:fixed; bottom:10px; right:10px;
-background:#333; color:white; padding:8px 12px;
-border-radius:5px; text-decoration:none;">
-Admin
-</a>
+        window.saveResult = async (data) => {
+            try {
+                console.log("🔥 Đang gửi dữ liệu:", data);
+                await addDoc(collection(db, "results"), {
+                    name: data.name || "N/A",
+                    sbd: data.sbd || "N/A",
+                    class: data.class || "N/A",
+                    school: data.school || "N/A",
+                    score: data.score || 0,
+                    duration: data.duration || 0,
+                    submitTime: data.submitTime || new Date().toISOString()
+                });
+                console.log("✅ Lưu Firebase thành công!");
+            } catch (e) {
+                console.error("❌ Lỗi Firebase:", e);
+            }
+        };
+    </script>
+
+    <script>
+        function goAdmin() {
+            const pass = prompt("Nhập mật khẩu Admin:");
+            if (pass === "1234@@") {
+                window.location.href = "admin.html";
+            } else {
+                alert("Sai mật khẩu!");
+            }
+        }
+    </script>
+
+    <a href="javascript:void(0)" onclick="goAdmin()" style="position:fixed; bottom:10px; right:10px; background:#333; color:white; padding:8px 12px; border-radius:5px; text-decoration:none; z-index:9999;">
+        Admin
+    </a>
 </body>
 </html>
