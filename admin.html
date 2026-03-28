@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Bảng xếp hạng</title>
+
+  <!-- Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background: #007bff; color: white; }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      background: green;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover { background: darkgreen; }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Bảng xếp hạng thí sinh</h1>
+
+<button onclick="loadData()">🔄 Tải dữ liệu</button>
+<button onclick="exportExcel()">📥 Xuất Excel</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Họ tên</th>
+      <th>SBD</th>
+      <th>Lớp</th>
+      <th>Trường</th>
+      <th>Điểm</th>
+      <th>Thời gian (s)</th>
+      <th>Thời gian nộp</th>
+    </tr>
+  </thead>
+  <tbody id="table-body"></tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* 🔥 CONFIG CỦA BẠN */
+const firebaseConfig = {
+  apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
+  authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
+  projectId: "game-vat-ly-9-924bc",
+  storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
+  messagingSenderId: "772223015613",
+  appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4",
+  measurementId: "G-16MQPKXQXY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let globalData = [];
+
+window.loadData = async function() {
+  const q = query(
+    collection(db, "results"),
+    orderBy("score", "desc"),
+    orderBy("duration", "asc")
+  );
+
+  const snapshot = await getDocs(q);
+
+  let html = "";
+  let rank = 1;
+  globalData = [];
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    globalData.push({
+      rank: rank,
+      ...d
+    });
+
+    html += `
+      <tr>
+        <td>${rank++}</td>
+        <td>${d.name}</td>
+        <td>${d.sbd}</td>
+        <td>${d.class}</td>
+        <td>${d.school}</td>
+        <td>${d.score}</td>
+        <td>${d.duration}</td>
+        <td>${new Date(d.submitTime).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("table-body").innerHTML = html;
+};
+
+window.exportExcel = function() {
+  if (globalData.length === 0) {
+    alert("Chưa có dữ liệu!");
+    return;
+  }
+
+  const data = globalData.map(d => ({
+    "Xếp hạng": d.rank,
+    "Họ tên": d.name,
+    "SBD": d.sbd,
+    "Lớp": d.class,
+    "Trường": d.school,
+    "Điểm": d.score,
+    "Thời gian (s)": d.duration,
+    "Thời gian nộp": new Date(d.submitTime).toLocaleString()
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, ws, "Ranking");
+
+  XLSX.writeFile(wb, "bang_xep_hang.xlsx");
+};
+
+// tự load khi mở
+loadData();
+
+</script>
+
+</body>
+</html>
