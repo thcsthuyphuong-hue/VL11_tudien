@@ -512,16 +512,20 @@
             if (score >= 5) startFireworks();
         
 		// 🔥 LƯU FIREBASE
-const now = new Date();
-addDoc(collection(window.db, "results"), {
-  name: gameState.user.name,
-  sbd: gameState.user.sbd,
-  class: gameState.user.class,
-  school: gameState.user.school,
-  score: score,
-  duration: 180 - gameState.timer,
-  submitTime: now.toISOString()
-});
+if (window.db && window.addDoc && window.collection) {
+  addDoc(collection(window.db, "results"), {
+    name: gameState.user.name,
+    sbd: gameState.user.sbd,
+    class: gameState.user.class,
+    school: gameState.user.school,
+    score: score,
+    duration: 180 - gameState.timer,
+    submitTime: new Date().toISOString()
+  })
+  .then(() => console.log("✅ Đã lưu Firebase"))
+  .catch(err => console.error("❌ Lỗi:", err));
+} else {
+  console.error("❌ Firebase chưa sẵn sàng");
 }
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
