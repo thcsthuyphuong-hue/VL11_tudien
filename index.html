@@ -510,8 +510,19 @@
                 <span class="italic text-yellow-400 mt-4 block">Có thể làm lại để khẳng định đẳng cấp!</span>
             `;
             if (score >= 5) startFireworks();
-        }
-
+        
+		// 🔥 LƯU FIREBASE
+const now = new Date();
+addDoc(collection(window.db, "results"), {
+  name: gameState.user.name,
+  sbd: gameState.user.sbd,
+  class: gameState.user.class,
+  school: gameState.user.school,
+  score: score,
+  duration: 180 - gameState.timer,
+  submitTime: now.toISOString()
+});
+}
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
@@ -589,5 +600,26 @@
         }
         window.onload = init;
     </script>
+	<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
+  authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
+  projectId: "game-vat-ly-9-924bc",
+  storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
+  messagingSenderId: "772223015613",
+  appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// GẮN VÀO window để dùng trong file cũ
+window.db = db;
+window.addDoc = addDoc;
+window.collection = collection;
+</script>
 </body>
 </html>
