@@ -525,9 +525,9 @@ if (window.db && window.addDoc && window.collection) {
   .then(() => console.log("✅ Đã lưu Firebase"))
   .catch(err => console.error("❌ Lỗi:", err));
 } else {
- console.error("❌ Firebase chưa sẵn sàng");
-  }
+  console.error("❌ Firebase chưa sẵn sàng");
 }
+		}
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
