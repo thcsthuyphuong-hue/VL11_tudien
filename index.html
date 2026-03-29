@@ -499,8 +499,9 @@
 
         function next() { gameState.currentLevel++; gameState.selectedIdx = undefined; loadQuestion(); }
 
-        function end(win, manual = false) {
-            gameState.isGameOver = true; clearInterval(gameState.timerInterval);
+       function end(win, manual = false) {
+            gameState.isGameOver = true; 
+            clearInterval(gameState.timerInterval);
             let score = manual ? pointsConfig[gameState.currentLevel - 1] : (win ? 10 : (gameState.currentLevel < 5 ? 0 : (gameState.currentLevel < 10 ? 5 : 7)));
             const rank = score >= 9 ? "Xuất sắc" : (score >= 8 ? "Giỏi" : (score >= 6.5 ? "Khá" : (score >= 5 ? "Trung bình" : "Cần cố gắng")));
             
@@ -512,22 +513,22 @@
             `;
             if (score >= 5) startFireworks();
         
-		// 🔥 LƯU FIREBASE (BẢN CHUẨN ĐỂ XUẤT EXCEL)
-if (typeof window.saveResult === 'function') {
-    window.saveResult({
-        name: gameState.user.name || "N/A",
-        sbd: gameState.user.sbd || "N/A",
-        class: gameState.user.class || "N/A",
-        school: gameState.user.school || "N/A",
-        score: parseFloat(score.toFixed(1)),
-        duration: 180 - gameState.timer,
-        submitTime: Date.now() // Bắt buộc dùng Date.now()
- });
-	} else {
-console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
-}
-}    
-        function useLifeline(type) {
+            // 🔥 LƯU FIREBASE (ĐÃ TỐI ƯU NGOẶC)
+            if (typeof window.saveResult === 'function') {
+                window.saveResult({
+                    name: gameState.user.name || "N/A",
+                    sbd: gameState.user.sbd || "N/A",
+                    class: gameState.user.class || "N/A",
+                    school: gameState.user.school || "N/A",
+                    score: parseFloat(score.toFixed(1)),
+                    duration: 180 - gameState.timer,
+                    submitTime: Date.now() 
+                      });
+       } else {
+				console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
+    }
+  }
+		function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
             document.getElementById(`life-${type}`).style.display = 'none';
@@ -626,8 +627,8 @@ requestAnimationFrame(animate);
         }
         window.onload = init;
     </script>
-	<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -638,24 +639,24 @@ requestAnimationFrame(animate);
             messagingSenderId: "772223015613",
             appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Xuất hàm ra toàn cục để phần Game có thể gọi được
         window.saveResult = async (data) => {
             try {
-                console.log("🔥 Đang gửi dữ liệu lên Firebase...");
-                await addDoc(collection(db, "results"), data);
-                console.log("✅ Lưu Firebase thành công!");
+                console.log("🚀 Đang truyền dữ liệu lên Firebase...");
+                const docRef = await addDoc(collection(db, "results"), data);
+                console.log("✅ Đã lưu thành công! ID:", docRef.id);
             } catch (e) {
-                console.error("❌ Lỗi Firebase:", e);
+                console.error("❌ Lỗi kết nối Firebase:", e);
                 alert("Lỗi lưu kết quả: " + e.message);
             }
         };
     </script>
-   <script>
+
+    <script>
         function goAdmin() {
-            // Tạo khung nhập liệu ẩn danh hiện giữa màn hình
             const overlay = document.createElement('div');
             overlay.style = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
             overlay.innerHTML = `
@@ -672,10 +673,7 @@ requestAnimationFrame(animate);
             document.body.appendChild(overlay);
             const input = document.getElementById('admin-pass');
             input.focus();
-
-            // Cho phép nhấn phím Enter để xác nhận
             input.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('confirm-btn').click(); };
-
             document.getElementById('confirm-btn').onclick = () => {
                 if (input.value === "1234@@") {
                     window.location.href = "admin.html";
