@@ -522,11 +522,11 @@ if (typeof window.saveResult === 'function') {
         score: parseFloat(score.toFixed(1)),
         duration: 180 - gameState.timer,
         submitTime: Date.now() // Bắt buộc dùng Date.now()
-    });
+ });
+	} else {
+console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
 }
-} else {
-    console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
-}
+}    
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
