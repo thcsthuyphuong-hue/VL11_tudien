@@ -1,5 +1,53 @@
-<!-- GIỮ NGUYÊN TOÀN BỘ CODE CỦA BẠN Ở TRÊN -->
-<!-- CHỈ THAY PHẦN FIREBASE CUỐI BẰNG ĐOẠN NÀY -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Bảng xếp hạng</title>
+
+  <!-- Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background: #007bff; color: white; }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      background: green;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover { background: darkgreen; }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Bảng xếp hạng thí sinh</h1>
+
+<button onclick="loadData()">🔄 Tải dữ liệu</button>
+<button onclick="exportExcel()">📥 Xuất Excel</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Họ tên</th>
+      <th>SBD</th>
+      <th>Lớp</th>
+      <th>Trường</th>
+      <th>Điểm</th>
+      <th>Thời gian (s)</th>
+      <th>Thời gian nộp</th>
+    </tr>
+  </thead>
+  <tbody id="table-body"></tbody>
+</table>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
