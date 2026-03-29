@@ -368,7 +368,7 @@
             });
         }
 
-      function startGame(mode) {
+    function startGame(mode) {
             const name = document.getElementById('input-name').value;
             const sbd = document.getElementById('input-sbd').value;
             const cls = document.getElementById('input-class').value;
@@ -383,7 +383,7 @@
             gameState.history = [];
             gameState.lifelines = { 5050: true, audience: true, phone: true };
             
-            // 🔥 XÁO TRỘN VÀ CHỌN BỘ CÂU HỎI MỚI MỖI LẦN CHƠI
+            // 🔥 XÁO TRỘN CÂU HỎI MỖI LẦN CHƠI
             const shuffledMcqs = [...questionBank.mcq].sort(() => Math.random() - 0.5).slice(0, 12).map(q => ({...q, type:'mcq'}));
             const shuffledTfs = [...questionBank.tf].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'tf'}));
             const shuffledShorts = [...questionBank.short].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'short'}));
@@ -403,8 +403,6 @@
             
             loadQuestion();
         }
-        }
-
         function loadQuestion() {
             clearInterval(gameState.timerInterval);
             gameState.timer = 180; updateTimerUI(); startTimer();
