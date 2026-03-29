@@ -368,7 +368,7 @@
             });
         }
 
-        function startGame(mode) {
+      function startGame(mode) {
             const name = document.getElementById('input-name').value;
             const sbd = document.getElementById('input-sbd').value;
             const cls = document.getElementById('input-class').value;
@@ -383,26 +383,26 @@
             gameState.history = [];
             gameState.lifelines = { 5050: true, audience: true, phone: true };
             
-            const mcqs = [...questionBank.mcq].sort(() => 0.5 - Math.random()).slice(0, 12).map(q => ({...q, type:'mcq'}));
-            const tfs = [...questionBank.tf].sort(() => 0.5 - Math.random()).slice(0, 4).map(q => ({...q, type:'tf'}));
-            const shorts = [...questionBank.short].sort(() => 0.5 - Math.random()).slice(0, 4).map(q => ({...q, type:'short'}));
-            gameState.questions = [...mcqs, ...tfs, ...shorts];
+            // 🔥 XÁO TRỘN VÀ CHỌN BỘ CÂU HỎI MỚI MỖI LẦN CHƠI
+            const shuffledMcqs = [...questionBank.mcq].sort(() => Math.random() - 0.5).slice(0, 12).map(q => ({...q, type:'mcq'}));
+            const shuffledTfs = [...questionBank.tf].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'tf'}));
+            const shuffledShorts = [...questionBank.short].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'short'}));
+            
+            gameState.questions = [...shuffledMcqs, ...shuffledTfs, ...shuffledShorts];
 
             document.getElementById('screen-login').classList.add('hidden-screen');
             document.getElementById('game-header').classList.remove('hidden-screen');
             document.getElementById('points-ladder').classList.remove('hidden-screen');
             document.getElementById('screen-game').classList.remove('hidden-screen');
             document.getElementById('screen-result').classList.add('hidden-screen');
-            document.getElementById('btn-history').classList.remove('hidden');
-            document.getElementById('result-title').className = "text-4xl font-bold text-yellow-400 mb-6 uppercase";
-            document.getElementById('result-title').innerText = "KẾT QUẢ";
-
+            
             const badge = document.getElementById('display-mode');
             badge.innerText = mode === 'official' ? 'Ghế Nóng' : 'Luyện Tập';
             badge.className = mode === 'official' ? 'ml-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-red-600' : 'ml-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-green-600';
             document.getElementById('display-info').innerText = `${name} - SBD: ${sbd}`;
             
             loadQuestion();
+        }
         }
 
         function loadQuestion() {
