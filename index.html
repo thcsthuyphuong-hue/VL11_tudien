@@ -452,11 +452,9 @@
             document.getElementById('btn-stop').classList.toggle('hidden', gameState.currentLevel < 5);
             renderMath();
         }
-
         function submitAnswer() {
             const q = gameState.questions[gameState.currentLevel];
             let correct = false, uA = "", cA = "", details = {};
-            
             if (q.type === 'mcq') {
                 if (gameState.selectedIdx === undefined) return alert("Vui lòng chọn đáp án!");
                 const ch = q.shuffled[gameState.selectedIdx];
@@ -475,7 +473,6 @@
                 if(!uA) return alert("Nhập đáp án!");
                 correct = uA === q.a; cA = q.a;
             }
-
             gameState.history.push({ 
                 q: q.type==='tf'?q.lead:q.q, isCorrect: correct, userAns: uA, correctAns: cA, 
                 exp: q.exp || (q.items ? q.items.map(x=>x.exp).join("<br>") : ""),
@@ -494,7 +491,6 @@
                 playSound('wrong'); end(false);
             }
         }
-
         function next() { gameState.currentLevel++; gameState.selectedIdx = undefined; loadQuestion(); }
 
 function end(win, manual = false) {
@@ -523,6 +519,7 @@ function end(win, manual = false) {
                     submitTime: Date.now()
                 });
             }
+	}	
         function useLifeline(type) {
             if (!gameState.lifelines[type]) return;
             gameState.lifelines[type] = false;
