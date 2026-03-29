@@ -515,16 +515,17 @@
         
             // 🔥 LƯU FIREBASE (ĐÃ TỐI ƯU NGOẶC)
             if (typeof window.saveResult === 'function') {
-                window.saveResult({
-                    name: gameState.user.name || "N/A",
-                    sbd: gameState.user.sbd || "N/A",
-                    class: gameState.user.class || "N/A",
-                    school: gameState.user.school || "N/A",
-                    score: parseFloat(score.toFixed(1)),
-                    duration: 180 - gameState.timer,
-                    submitTime: Date.now() 
-                      });
-       } else {
+    await window.saveResult({
+        name: gameState.user.name || "N/A",
+        sbd: gameState.user.sbd || "N/A",
+        class: gameState.user.class || "N/A",
+        school: gameState.user.school || "N/A",
+        score: parseFloat(score.toFixed(1)),
+        duration: 180 - gameState.timer,
+        submitTime: Date.now()
+    });
+}
+			else {
 				console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
     }
   }
@@ -642,17 +643,18 @@ requestAnimationFrame(animate);
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+window.saveResult = async (data) => {
+    try {
+        console.log("🚀 Đang gửi:", data);
 
-        window.saveResult = async (data) => {
-            try {
-                console.log("🚀 Đang truyền dữ liệu lên Firebase...");
-                const docRef = await addDoc(collection(db, "results"), data);
-                console.log("✅ Đã lưu thành công! ID:", docRef.id);
-            } catch (e) {
-                console.error("❌ Lỗi kết nối Firebase:", e);
-                alert("Lỗi lưu kết quả: " + e.message);
-            }
-        };
+        const docRef = await addDoc(collection(db, "results"), data);
+
+        console.log("✅ Thành công:", docRef.id);
+    } catch (e) {
+        console.error("🔥 FIREBASE ERROR:", e);
+        alert(e.message);
+    }
+}; 
     </script>
 
     <script>
