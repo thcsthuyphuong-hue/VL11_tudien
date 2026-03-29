@@ -521,9 +521,9 @@ if (typeof window.saveResult === 'function') {
         school: gameState.user.school || "N/A",
         score: parseFloat(score.toFixed(1)),
         duration: 180 - gameState.timer,
-        submitTime: Date.now()
-	
+        submitTime: Date.now() // Bắt buộc dùng Date.now()
     });
+}
 } else {
     console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
 }
@@ -628,7 +628,7 @@ requestAnimationFrame(animate);
         window.onload = init;
     </script>
 	<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const firebaseConfig = {
