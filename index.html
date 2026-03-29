@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ai là triệu phú - Tụ điện Vật lí 11</title>
+    <title>Ai là triệu phú - Vật lí 11</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Excel Export Library -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         window.MathJax = {
             tex: {
@@ -29,6 +31,8 @@
             animation: gradient 15s ease infinite;
             color: white;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
             overflow-x: hidden;
             font-size: 20px;
         }
@@ -43,567 +47,719 @@
             border-radius: 25px;
             transition: all 0.3s;
             text-align: left;
-            padding: 10px 20px;
+            padding: 12px 20px;
             cursor: pointer;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             width: 100%;
+            display: flex;
+            align-items: center;
         }
         .btn-answer:hover {
             background: #f1c40f;
             color: black;
             border-color: white;
+            transform: scale(1.02);
         }
-        .btn-answer.selected { background: #f1c40f; color: black; }
-        .btn-answer.correct { background: #2ecc71 !important; color: white; }
-        .btn-answer.wrong { background: #e74c3c !important; color: white; }
-        
-        .ladder-item { height: 28px; font-size: 14px; padding: 2px 5px; }
-        .ladder-active { background-color: #f1c40f; color: black; font-weight: bold; border-radius: 4px; }
-        .milestone-5 { color: #f1c40f; font-weight: bold; }
-        .milestone-10 { color: #2ecc71; font-weight: bold; }
-        .milestone-20 { color: #e74c3c; font-weight: bold; }
+        .btn-answer.selected { background: #f1c40f; color: black; border-color: white; }
+        .ladder-item { height: 26px; font-size: 13px; padding: 0 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .ladder-active { background-color: #f1c40f; color: black; font-weight: bold; border-radius: 4px; box-shadow: 0 0 10px #f1c40f; }
+        .milestone-5 { color: #f1c40f; font-weight: bold; border-left: 4px solid #f1c40f; }
+        .milestone-10 { color: #2ecc71; font-weight: bold; border-left: 4px solid #2ecc71; }
+        .milestone-20 { color: #e74c3c; font-weight: bold; border-left: 4px solid #e74c3c; }
 
-        .hidden-screen { display: none; }
-        .modal-overlay { background: rgba(0,0,0,0.9); position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .hidden-screen { display: none !important; }
+        .modal-overlay { background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         
         canvas#fireworks { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 100; }
         
-        .timer-warning { color: #e74c3c; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1a2a6c; }
-        ::-webkit-scrollbar-thumb { background: #f1c40f; border-radius: 10px; }
+        .timer-warning { color: #e74c3c; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
 
         .milestone-card {
-            background: white;
+            background: linear-gradient(to bottom, #ffffff, #e6f7ff);
             color: black;
             padding: 2.5rem;
             border-radius: 1.5rem;
-            max-width: 550px;
+            max-width: 650px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            border: 6px solid transparent;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.3);
+            border: 8px solid #3498db;
             animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        #m-title { font-size: 32px; color: #1a2a6c; margin-bottom: 1rem; }
+        #m-body { font-size: 22px; line-height: 1.5; color: #333; font-weight: 500; margin-bottom: 2rem; }
+
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .milestone-card.level-5 { border-color: #f1c40f; background: linear-gradient(to bottom, #ffffff, #fff9db); }
-        .milestone-card.level-10 { border-color: #2ecc71; background: linear-gradient(to bottom, #ffffff, #e3fafc); }
+        .level-5 { border-color: #f1c40f; }
+        .level-10 { border-color: #2ecc71; }
+
+        #main-container { max-width: 1200px; margin: 0 auto; padding-top: 10px; }
+        .points-sidebar { width: 85px; flex-shrink: 0; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 280px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 13px;
+            font-weight: normal;
+            line-height: 1.4;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #f1c40f;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Admin Styles */
+        .admin-table { width: 100%; border-collapse: collapse; background: white; color: black; font-size: 14px; }
+        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .admin-table th { background: #1a2a6c; color: white; position: sticky; top: 0; }
+        .admin-table tr:nth-child(even) { background: #f2f2f2; }
+        .admin-btn-sort { background: #3498db; color: white; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin: 2px; }
+        .admin-btn-sort:hover { background: #2980b9; }
     </style>
 </head>
-<body class="p-2">
+<body>
 
     <canvas id="fireworks"></canvas>
 
-    <!-- Header UI -->
-    <div id="game-header" class="max-w-4xl mx-auto flex justify-between items-center bg-black/40 p-2 rounded-lg mb-2 hidden-screen">
-        <div class="text-sm">
-            <span id="display-info" class="font-bold"></span>
-            <span id="display-mode" class="ml-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold"></span>
-        </div>
-        <div id="timer" class="text-xl font-bold text-yellow-400">180s</div>
-        <div class="flex gap-2">
-            <button onclick="useLifeline('5050')" id="life-5050" class="bg-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-500">50:50</button>
-            <button onclick="useLifeline('audience')" id="life-audience" class="bg-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-500">Khán giả</button>
-            <button onclick="useLifeline('phone')" id="life-phone" class="bg-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-500">Gọi điện</button>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-4">
-        <div id="main-area" class="flex-grow">
-            <!-- Login Screen -->
-            <div id="screen-login" class="bg-white/10 backdrop-blur-md p-6 md:p-8 rounded-2xl shadow-2xl text-center border border-white/20 mt-4 md:mt-10">
-                <h1 class="text-3xl font-bold mb-4 text-yellow-400 uppercase tracking-widest">Ai là triệu phú - Vật lí 11</h1>
-                <p class="mb-4 italic">Chủ đề: Tụ điện</p>
-                <div class="grid grid-cols-1 gap-3 max-w-md mx-auto mb-6">
-                    <input type="text" id="input-name" placeholder="Họ và tên" class="p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    <input type="text" id="input-sbd" placeholder="Số báo danh" class="p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    <input type="text" id="input-class" placeholder="Lớp" class="p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                    <input type="text" id="input-school" placeholder="Trường THPT" class="p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+    <div id="main-container" class="flex flex-col h-screen">
+        <!-- TOP HEADER -->
+        <div id="game-header" class="hidden-screen bg-black/50 p-2 rounded-lg mb-2 flex justify-between items-center text-sm">
+            <div class="flex flex-col">
+                <span id="display-info" class="font-bold text-yellow-400"></span>
+                <span id="display-school" class="text-[10px] opacity-80"></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="timer" class="text-2xl font-bold text-yellow-400 border-2 border-yellow-400 px-3 py-1 rounded-full">180s</div>
+                <div class="flex gap-1">
+                    <button onclick="useLifeline('5050')" id="life-5050" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">50:50</button>
+                    <button onclick="useLifeline('audience')" id="life-audience" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">Khán giả</button>
+                    <button onclick="useLifeline('phone')" id="life-phone" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">Gọi điện</button>
                 </div>
-                <div class="flex flex-col gap-4 items-center">
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="showRules()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-full font-bold uppercase transition text-sm">Thể lệ</button>
-                        <button onclick="startGame('practice')" class="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-full font-bold uppercase transition text-sm">Luyện tập</button>
-                        <button onclick="startGame('official')" class="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-bold uppercase transition text-sm">Vào ngồi ghế nóng</button>
+            </div>
+        </div>
+
+        <div class="flex flex-grow gap-2 overflow-hidden">
+            <div id="game-content" class="flex-grow flex flex-col overflow-y-auto pb-10">
+                
+                <!-- Screen 1: Login -->
+                <div id="screen-login" class="bg-black/30 backdrop-blur-md p-6 rounded-2xl border border-white/20 text-center m-auto max-w-lg w-full relative">
+                    <button onclick="promptAdmin()" class="absolute top-4 right-4 text-[10px] bg-white/20 px-2 py-1 rounded hover:bg-white/40 uppercase font-bold">Admin</button>
+                    <h1 class="text-3xl font-bold mb-2 text-yellow-400 uppercase tracking-tighter">Ai là triệu phú</h1>
+                    <p class="mb-6 text-sm italic text-blue-200">Chủ đề: Tụ điện - Vật lí 11</p>
+                    <div class="space-y-3 mb-6">
+                        <input type="text" id="input-name" placeholder="Họ và tên" class="w-full p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 outline-none">
+                        <input type="text" id="input-sbd" placeholder="Số báo danh" class="w-full p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 outline-none">
+                        <input type="text" id="input-class" placeholder="Lớp" class="w-full p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 outline-none">
+                        <input type="text" id="input-school" placeholder="Trường THPT" class="w-full p-3 rounded bg-white/20 border border-white/30 text-white placeholder-white/60 outline-none">
                     </div>
-                    <p id="cheat-warning" class="text-red-400 text-sm font-bold mt-2 opacity-0 transition-opacity duration-300 italic">
-                        ⚠️ Chú ý: Nếu rời khỏi màn hình này, bạn phải dừng cuộc chơi!
-                    </p>
-                </div>
-            </div>
-
-            <!-- Rules Screen -->
-            <div id="screen-rules" class="hidden-screen bg-white text-black p-8 rounded-2xl shadow-2xl max-w-4xl mx-auto mt-4">
-                <h2 class="text-2xl font-bold mb-4 text-center text-blue-800 uppercase">THỂ LỆ TRÒ CHƠI</h2>
-                <div class="space-y-4 text-base leading-relaxed text-gray-800">
-                    <p>Nếu ở chế độ <strong>luyện tập</strong>, bạn có thể làm lại nhiều lần, có thể chuyển qua cửa sổ (tab) khác để tra cứu. Còn ở chế độ <strong>NGỒI VÀO GHẾ NÓNG</strong>, bạn tuyệt đối không được mở các cửa sổ khác, không được tra cứu qua messenger, zalo,... nếu tự động chuyển tab, cuộc thi kết thúc.</p>
-                    <p><strong>Cấu trúc bài thi:</strong> 20 câu hỏi về Tụ điện (12 MCQ, 4 Đúng/Sai, 4 Tính toán ngắn).</p>
-                    <p><strong>Các mốc quan trọng:</strong></p>
-                    <ul class="list-disc ml-6 space-y-1">
-                        <li>Vượt qua mốc 5 câu, được 5 điểm.</li>
-                        <li>Từ câu thứ 6 đến câu 20 bạn có quyền dừng cuộc chơi bất kì lúc nào để bảo toàn số điểm.</li>
-                        <li>Nếu sai ở câu từ câu 6 đến câu 10, sẽ quay về 5 điểm.</li>
-                        <li>Nếu sai từ câu 11 đến câu 20, điểm trở về mốc 7 điểm.</li>
-                    </ul>
-                </div>
-                <button onclick="backToHome()" class="mt-6 bg-red-600 text-white px-6 py-2 rounded-lg block mx-auto font-bold uppercase transition hover:bg-red-700">Quay lại trang chủ</button>
-            </div>
-
-            <!-- Gameplay Screen -->
-            <div id="screen-game" class="hidden-screen mt-2">
-                <div id="question-container" class="bg-black/40 p-6 rounded-xl border border-blue-500/30 mb-4">
-                    <div id="question-text" class="text-2xl font-bold mb-6">Đang tải câu hỏi...</div>
-                    <div id="lifeline-hint" class="hidden mb-4 p-3 bg-yellow-100 text-black rounded-lg border-l-4 border-yellow-600"></div>
-                    <div id="answers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                    <div id="tf-area" class="hidden space-y-4"></div>
-                    <div id="short-area" class="hidden space-y-4">
-                        <p class="text-sm text-yellow-300 italic font-medium"> Nhập kết quả không quá 4 kí tự, không có đơn vị, dùng dấu phẩy (,) nếu là số thập phân, ví dụ: 2,5</p>
-                        <input type="text" id="short-input" maxlength="10" class="w-full p-4 rounded bg-white text-black text-center text-3xl font-bold outline-none border-4 border-blue-400">
+                    <div class="flex flex-col gap-3">
+                        <button onclick="showRules()" class="bg-blue-600 hover:bg-blue-500 py-3 rounded-full font-bold uppercase transition">Thể lệ</button>
+                        <button onclick="startGame('practice')" class="bg-green-600 hover:bg-green-500 text-white py-3 rounded-full font-bold uppercase transition">Luyện tập</button>
+                        <div class="tooltip w-full">
+                            <button onclick="startGame('official')" class="bg-yellow-500 hover:bg-yellow-400 text-black py-4 rounded-full font-bold uppercase transition text-lg shadow-xl w-full">Vào ngồi ghế nóng</button>
+                            <span class="tooltiptext">Nếu bạn chọn NGỒI VÀO GHẾ NÓNG, khi rời khỏi màn hình này, hệ thống sẽ tự động thu bài, cuộc thi sẽ kết thúc khi bạn chuyển tab.</span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex justify-between items-center px-4">
-                    <button id="btn-stop" onclick="stopGameManual()" class="hidden bg-gray-600 px-4 py-2 rounded hover:bg-gray-500 transition font-bold">Dừng cuộc chơi</button>
-                    <button id="btn-submit" onclick="submitAnswer()" class="bg-green-600 px-10 py-3 rounded-full font-bold hover:bg-green-500 ml-auto shadow-lg transition transform hover:scale-105">Nộp bài</button>
+
+                <!-- Screen 2: Rules -->
+                <div id="screen-rules" class="hidden-screen bg-white text-black p-6 rounded-2xl shadow-2xl max-w-2xl m-auto">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-blue-800">THỂ LỆ TRÒ CHƠI</h2>
+                    <div class="text-sm space-y-3 leading-snug">
+                        <p>Chào mừng các em đến với trò chơi <strong>"Ai là triệu phú – Vật lí 11"</strong>.</p>
+                        <p>Người chơi sẽ lần lượt chinh phục 20 câu hỏi:</p>
+                        <ul class="list-disc ml-6">
+                            <li>Câu 1-12: Trắc nghiệm MCQ</li>
+                            <li>Câu 13-16: Trắc nghiệm Đúng/Sai</li>
+                            <li>Câu 17-20: Trả lời ngắn</li>
+                        </ul>
+                        <p><strong>Thời gian:</strong> 180 giây/câu.</p>
+                        <p><strong>Cơ chế điểm:</strong> Sai trước câu 5: 0đ; Sai 6-10: 5đ; Sai 11-20: 7đ.</p>
+                        <p class="text-red-600 font-bold">LƯU Ý: Chế độ "Ghế nóng" tự động thu bài nếu chuyển tab!</p>
+                    </div>
+                    <button onclick="backToHome()" class="mt-6 bg-red-600 text-white px-8 py-2 rounded-full block mx-auto font-bold uppercase">Quay lại</button>
+                </div>
+
+                <!-- Screen 3: Gameplay -->
+                <div id="screen-game" class="hidden-screen mt-2 px-2">
+                    <div id="question-container" class="bg-black/40 p-5 rounded-xl border border-blue-500/30 mb-4">
+                        <div id="question-text" class="text-xl font-bold mb-6 leading-tight"></div>
+                        <div id="hint-box" class="hidden mb-4 p-3 bg-yellow-100 text-black rounded-lg border-l-4 border-yellow-600 text-sm italic"></div>
+                        <div id="mcq-area" class="grid grid-cols-1 gap-2"></div>
+                        <div id="tf-area" class="hidden space-y-3"></div>
+                        <div id="short-area" class="hidden">
+                            <p class="text-[13px] text-yellow-300 italic mb-2 font-medium">Nhập kết quả không quá 4 kí tự, nếu là số thập phân, dùng dấu phẩy (,), ví dụ: 2,5</p>
+                            <input type="text" id="short-input" class="w-full p-4 rounded bg-white text-black text-center text-4xl font-bold outline-none border-4 border-blue-400">
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <button id="btn-stop" onclick="confirmStop()" class="hidden bg-gray-600 px-4 py-2 rounded-lg font-bold text-sm uppercase">Dừng chơi</button>
+                        <button id="btn-submit" onclick="processSubmission()" class="bg-green-600 px-10 py-3 rounded-full font-bold uppercase shadow-lg hover:bg-green-500 ml-auto">Gửi đáp án</button>
+                    </div>
+                </div>
+
+                <!-- Screen 4: Result -->
+                <div id="screen-result" class="hidden-screen bg-white/10 backdrop-blur-md p-8 rounded-2xl text-center m-auto border border-white/20 w-full max-w-lg">
+                    <h2 id="result-title" class="text-4xl font-bold text-yellow-400 mb-4 uppercase">KẾT QUẢ</h2>
+                    <div id="result-body" class="text-lg mb-8 space-y-4"></div>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="showHistory()" class="bg-blue-600 py-3 rounded-full font-bold uppercase">Lịch sử làm bài</button>
+                        <button onclick="location.reload()" class="bg-yellow-500 text-black py-3 rounded-full font-bold uppercase">Làm lại</button>
+                    </div>
+                </div>
+
+                <!-- Screen 5: History -->
+                <div id="screen-history" class="hidden-screen bg-white text-black p-4 rounded-2xl shadow-2xl mt-4 flex flex-col h-full">
+                    <h2 class="text-xl font-bold mb-4 text-center text-blue-900 uppercase border-b pb-2">Giải thích chi tiết</h2>
+                    <div id="history-list" class="flex-grow overflow-y-auto space-y-8 pr-2"></div>
+                    <button onclick="closeHistory()" class="mt-4 bg-red-600 text-white py-3 rounded-lg font-bold uppercase w-full">Đóng lịch sử</button>
+                </div>
+
+                <!-- Screen 6: Admin Dashboard -->
+                <div id="screen-admin" class="hidden-screen bg-white text-black p-4 md:p-6 rounded-2xl shadow-2xl mt-4 flex flex-col h-full overflow-hidden">
+                    <div class="flex justify-between items-center border-b pb-4 mb-4">
+                        <h2 class="text-2xl font-bold text-blue-900 uppercase">📊 QUẢN TRỊ VIÊN</h2>
+                        <button onclick="backToHome()" class="bg-red-600 text-white px-4 py-2 rounded font-bold text-sm">THOÁT</button>
+                    </div>
+                    
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <span class="text-sm font-bold w-full text-gray-500">SẮP XẾP THEO:</span>
+                        <button onclick="sortAdminData('rank')" class="admin-btn-sort">Hạng (Điểm & TG)</button>
+                        <button onclick="sortAdminData('score')" class="admin-btn-sort">Điểm</button>
+                        <button onclick="sortAdminData('sbd')" class="admin-btn-sort">SBD</button>
+                        <button onclick="sortAdminData('duration')" class="admin-btn-sort">Thời gian làm</button>
+                        <button onclick="sortAdminData('class')" class="admin-btn-sort">Lớp</button>
+                        <button onclick="sortAdminData('school')" class="admin-btn-sort">Trường</button>
+                        <button onclick="sortAdminData('submitTime')" class="admin-btn-sort">Giờ nộp bài</button>
+                        <button onclick="exportAdminToExcel()" class="bg-green-700 text-white px-6 py-2 rounded font-bold text-sm ml-auto">KẾT XUẤT EXCEL</button>
+                    </div>
+
+                    <div class="flex-grow overflow-auto border rounded">
+                        <table class="admin-table" id="table-results">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Hạng</th>
+                                    <th>SBD</th>
+                                    <th>Họ và tên</th>
+                                    <th>Lớp</th>
+                                    <th>Trường</th>
+                                    <th>Điểm</th>
+                                    <th>TG làm (s)</th>
+                                    <th>Giờ nộp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body">
+                                <!-- Data will load here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Result Screen -->
-            <div id="screen-result" class="hidden-screen bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl text-center border border-white/20 mt-10">
-                <h2 id="result-title" class="text-4xl font-bold text-yellow-400 mb-6 uppercase">KẾT QUẢ</h2>
-                <div id="result-text" class="text-xl mb-8 leading-loose"></div>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <button id="btn-history" onclick="showHistory()" class="bg-blue-600 px-8 py-3 rounded-full font-bold shadow-md hover:bg-blue-500 transition">Lịch sử làm bài</button>
-                    <button onclick="restartGame()" class="bg-yellow-500 text-black px-8 py-3 rounded-full font-bold shadow-md hover:bg-yellow-400 transition">Làm lại</button>
-                </div>
-            </div>
-
-            <!-- History Screen -->
-            <div id="screen-history" class="hidden-screen bg-white text-black p-4 md:p-6 rounded-2xl shadow-2xl mt-4 overflow-y-auto max-h-[85vh]">
-                <h2 class="text-2xl font-bold mb-6 text-center sticky top-0 bg-white py-3 border-b z-10 uppercase text-blue-900">Chi tiết bài làm</h2>
-                <div id="history-content" class="space-y-10 pb-12"></div>
-                <button onclick="closeHistory()" class="mt-8 bg-red-600 text-white px-8 py-3 rounded-lg block mx-auto font-bold uppercase sticky bottom-0 shadow-2xl z-20 transition hover:bg-red-700">Đóng lịch sử</button>
-            </div>
-        </div>
-
-        <div id="points-ladder" class="w-[80px] bg-black/60 p-2 rounded-lg flex flex-col-reverse justify-between hidden-screen border-l border-blue-500"></div>
-    </div>
-
-    <!-- Modals -->
-    <div id="global-modal" class="modal-overlay hidden">
-        <div id="modal-card" class="milestone-card">
-            <h3 id="modal-title" class="text-2xl font-bold mb-4 uppercase text-blue-800"></h3>
-            <div id="modal-body" class="mb-6 text-lg leading-relaxed text-gray-700 font-medium italic"></div>
-            <button onclick="closeModal()" id="modal-btn" class="bg-blue-600 text-white px-12 py-3 rounded-full font-bold uppercase hover:bg-blue-700 transition shadow-lg transform hover:scale-105"></button>
+            <!-- POINTS LADDER -->
+            <div id="points-ladder" class="points-sidebar hidden-screen flex flex-col-reverse justify-between py-2"></div>
         </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-black/70 text-[11px] p-1 text-center italic z-50 text-white tracking-wide border-t border-white/10">
-        Bản quyền thuộc về thạc sĩ Nguyễn Thị Ánh Hà, THPT Nguyễn Trường Tộ, Thành phố Huế
+    <!-- MODAL -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <div id="modal-content" class="milestone-card">
+            <h3 id="m-title" class="font-bold uppercase"></h3>
+            <p id="m-body" class="italic"></p>
+            <button id="m-btn" class="bg-blue-600 text-white px-12 py-4 rounded-full font-bold uppercase hover:bg-blue-700 shadow-lg text-lg">TIẾP TỤC</button>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 w-full bg-black/80 text-[10px] p-1 text-center italic text-white/70">
+        Bản quyền thuộc về Thạc sĩ Nguyễn Thị Ánh Hà, THPT Nguyễn Trường Tộ, Thành phố Huế
     </div>
 
     <script>
-        const pointsConfig = [0.5, 1.0, 1.5, 2.0, 5.0, 5.5, 6.0, 6.5, 6.8, 7.0, 7.3, 7.6, 7.9, 8.2, 8.5, 8.8, 9.1, 9.4, 9.7, 10.0];
-
-        const questionBank = {
+        const POINTS = [0.5, 1.0, 1.5, 2.0, 5.0, 5.5, 6.0, 6.5, 6.8, 7.0, 7.3, 7.6, 7.9, 8.2, 8.5, 8.8, 9.1, 9.4, 9.7, 10.0];
+        
+        const DB = {
             mcq: [
-                { q: "Tụ điện là hệ thống gồm hai vật dẫn đặt gần nhau và ngăn cách nhau bởi", a: ["một lớp điện môi.", "một lớp kim loại.", "một dây dẫn.", "không khí hoàn toàn."], c: 0, exp: "Tụ điện gồm hai vật dẫn cách nhau bởi lớp cách điện (điện môi).", hint: "Vật ở giữa phải cách điện." },
-                { q: "Đơn vị của điện dung trong hệ thống đo lường quốc tế SI là", a: ["Fara (F).", "Vôn (V).", "Culông (C).", "Ampe (A)."], c: 0, exp: "Điện dung đo bằng Fara (F), đặt theo tên Michael Faraday.", hint: "Fara là đơn vị chuẩn." },
-                { q: "Công thức liên hệ $Q, C, U$ của tụ điện là", a: ["$Q = C.U$.", "$Q = C/U$.", "$U = C.Q$.", "$C = Q.U$."], c: 0, exp: "Điện tích $Q$ tỉ lệ thuận với hiệu điện thế $U$ qua hằng số điện dung $C$: $Q = CU$.", hint: "Q = C nhân U." },
-                { q: "Năng lượng tụ điện tích trữ dưới dạng", a: ["điện trường.", "từ trường.", "nhiệt năng.", "hóa năng."], c: 0, exp: "Tụ điện tích trữ năng lượng trong điện trường đều giữa hai bản tụ.", hint: "Giữa hai bản tụ có điện trường." },
-                { q: "Kí hiệu của tụ điện trong sơ đồ mạch điện là", a: ["Hai vạch song song bằng nhau.", "Vạch dài vạch ngắn.", "Vòng tròn có X.", "Ziczac."], c: 0, exp: "Hai vạch song song có độ dài bằng nhau đại diện cho hai bản cực phẳng.", hint: "Mô tả cấu tạo tụ phẳng." },
-                { q: "Đơn vị $1 \\mu F$ bằng bao nhiêu Fara?", a: ["$10^{-6} F$.", "$10^{-9} F$.", "$10^{-3} F$.", "$10^{-12} F$."], c: 0, exp: "Tiền tố micro ($\mu$) có nghĩa là $10^{-6}$.", hint: "Một phần triệu." },
-                { q: "Trên tụ ghi $20 \\mu F - 200 V$. Giá trị $200 V$ cho biết", a: ["Hiệu điện thế tối đa.", "Hiệu điện thế trung bình.", "Suất điện động.", "Hiệu điện thế hiệu dụng."], c: 0, exp: "Giá trị hiệu điện thế tối đa để không đánh thủng điện môi.", hint: "Giới hạn an toàn." },
-                { q: "Điện dung của tụ điện phẳng phụ thuộc vào", a: ["Khoảng cách giữa hai bản.", "Điện tích của tụ.", "Hiệu điện thế nguồn.", "Chất liệu làm bản cực."], c: 0, exp: "C tỉ lệ nghịch với khoảng cách $d$.", hint: "Cấu trúc hình học của tụ." },
-                { q: "Công thức tính năng lượng tích trữ trong tụ điện là", a: ["$W = 1/2 CU^2$.", "$W = CU^2$.", "$W = 1/2 QU^2$.", "$W = 1/2 C^2U$."], c: 0, exp: "Năng lượng điện trường tỉ lệ với bình phương hiệu điện thế.", hint: "Giống công thức động năng." },
-                { q: "Khi tăng hiệu điện thế U giữa 2 bản tụ lên 2 lần thì điện dung C của tụ sẽ", a: ["không đổi.", "tăng 2 lần.", "giảm 2 lần.", "tăng 4 lần."], c: 0, exp: "C chỉ phụ thuộc cấu tạo, không phụ thuộc U và Q.", hint: "C là hằng số cấu tạo." },
-                { q: "Ghép song song 2 tụ $C_1 = 2 \\mu F$ và $C_2 = 3 \\mu F$ được bộ tụ", a: ["$5 \\mu F$.", "$1,2 \\mu F$.", "$1 \\mu F$.", "$6 \\mu F$."], c: 0, exp: "Ghép song song: $C_b = C_1 + C_2$.", hint: "Song song là cộng C." },
-                { q: "Thiết bị nào sau đây KHÔNG dùng tụ điện?", a: ["Bàn là điện.", "Mạch lọc nguồn.", "Đèn flash máy ảnh.", "Máy thu thanh."], c: 0, exp: "Bàn là chỉ dùng điện trở tỏa nhiệt.", hint: "Tụ dùng để tích và phóng năng lượng." },
-                { q: "Đơn vị hằng số điện môi $\\varepsilon$ là", a: ["không có đơn vị.", "Fara.", "Culông.", "Vôn."], c: 0, exp: "Hằng số điện môi là một tỉ số không thứ nguyên.", hint: "Nó là một hệ số so sánh." },
-                { q: "Để tích điện cho tụ ta nối nó với", a: ["Nguồn điện.", "Sợi dây dẫn.", "Vật nhiễm điện.", "Vật cách điện."], c: 0, exp: "Cần hiệu điện thế để tách điện tích.", hint: "Cần lực đẩy electron." },
-                { q: "Khi khoảng cách d giảm 2 lần thì điện dung C của tụ phẳng", a: ["Tăng 2 lần.", "Giảm 2 lần.", "Tăng 4 lần.", "Không đổi."], c: 0, exp: "C tỉ lệ nghịch với d.", hint: "Càng gần hút điện càng mạnh." },
-                { q: "Đồ thị biểu diễn mối liên hệ $Q(U)$ của tụ điện là", a: ["Đường thẳng qua gốc tọa độ.", "Đường parabol.", "Đường hyperbol.", "Đường tròn."], c: 0, exp: "Q = CU là hàm bậc nhất.", hint: "Q tỉ lệ thuận U." },
-                { q: "Hai bản tụ điện phẳng khi tích điện thì tích điện", a: ["Trái dấu, cùng độ lớn.", "Cùng dấu, cùng độ lớn.", "Trái dấu, khác độ lớn.", "Cùng dấu, khác độ lớn."], c: 0, exp: "Do cảm ứng, hai bản luôn trái dấu cùng độ lớn.", hint: "Tổng điện tích bộ bằng 0." },
-                { q: "Tụ điện ngăn dòng điện nào?", a: ["Dòng một chiều không đổi.", "Dòng xoay chiều.", "Dòng cao tần.", "Dòng biến thiên."], c: 0, exp: "Điện môi cách điện ngăn dòng 1 chiều.", hint: "Tụ ngăn DC." },
-                { q: "Bộ tụ gồm 2 tụ $4 \\mu F$ ghép nối tiếp có điện dung là", a: ["$2 \\mu F$.", "$8 \\mu F$.", "$4 \\mu F$.", "$1 \\mu F$."], c: 0, exp: "Ghép nối tiếp làm giảm điện dung.", hint: "Dùng công thức nghịch đảo." },
-                { q: "Khi $U = 10 V$, $C = 20 \\mu F$ thì điện tích $Q$ là", a: ["$0,2 mC$.", "$2 mC$.", "$0,02 mC$.", "$2000 \\mu C$."], c: 0, exp: "$Q = CU = 200.10^{-6} C = 0,2 mC$.", hint: "Tính tích C nhân U." },
-                { q: "Hành động nào làm tăng năng lượng tích trữ của tụ?", a: ["Tăng hiệu điện thế U.", "Rút tụ khỏi nguồn.", "Giảm C.", "Tăng khoảng cách d."], c: 0, exp: "W tỉ lệ thuận với bình phương U.", hint: "Nhìn vào công thức năng lượng." },
-                { q: "Đơn vị nanofara (nF) so với microfara ($\\mu F$) thì", a: ["nhỏ hơn 1000 lần.", "lớn hơn 1000 lần.", "nhỏ hơn 100 lần.", "lớn hơn 10 lần."], c: 0, exp: "$1 \\mu F = 1000 nF$.", hint: "Nano là mũ -9, micro là mũ -6." },
-                { q: "Đặc điểm điện trường trong lòng tụ phẳng là", a: ["Điện trường đều.", "Điện trường xoáy.", "Điện trường biến thiên.", "Điện trường không đều."], c: 0, exp: "Giữa 2 bản phẳng song song là điện trường đều.", hint: "Đường sức song song cách đều." },
-                { q: "Công thức tính điện dung tụ phẳng là", a: ["$C = \\varepsilon S / (k 4\\pi d)$.", "$C = U/Q$.", "$C = d/S$.", "$C = \\varepsilon d / S$."], c: 0, exp: "Công thức giải tích cấu tạo tụ.", hint: "Phụ thuộc S, d và điện môi." }
+                { q: "Tụ điện là hệ thống gồm hai vật dẫn đặt gần nhau và ngăn cách nhau bởi", a: ["một lớp điện môi.", "một lớp kim loại.", "một dây dẫn.", "chân không tuyệt đối."], c: 0, exp: "Tụ điện được cấu tạo bởi hai bản dẫn điện cách nhau bằng lớp điện môi (cách điện).", hint: "Lớp ở giữa phải là vật cách điện." },
+                { q: "Đơn vị của điện dung trong hệ SI là", a: ["Fara (F).", "Vôn (V).", "Culông (C).", "Ampe (A)."], c: 0, exp: "Điện dung $C$ có đơn vị là Fara (F).", hint: "Tên nhà bác học Michael Faraday." },
+                { q: "Công thức định nghĩa điện dung của tụ điện là", a: ["$C = Q/U$.", "$C = U/Q$.", "$C = Q \\cdot U$.", "$C = \\frac{1}{2} QU$."], c: 0, exp: "Điện dung $C$ đặc trưng cho khả năng tích điện, bằng tỉ số $Q/U$.", hint: "C bằng Q chia cho U." },
+                { q: "Năng lượng của tụ điện được tích trữ dưới dạng", a: ["năng lượng điện trường.", "năng lượng từ trường.", "năng lượng cơ năng.", "nhiệt năng."], c: 0, exp: "Khi tích điện, giữa hai bản tụ có điện trường, năng lượng tập trung tại đó.", hint: "Năng lượng nằm ở điện trường giữa hai bản." },
+                { q: "Trên vỏ một tụ điện có ghi $20\\ \\mu F - 200\\ V$. Số $200\\ V$ là", a: ["hiệu điện thế giới hạn.", "hiệu điện thế định mức.", "suất điện động.", "hiệu điện thế trung bình."], c: 0, exp: "Đây là hiệu điện thế tối đa tụ có thể chịu được mà không bị đánh thủng.", hint: "Giá trị tối đa cho phép." },
+                { q: "Điện dung của tụ điện phẳng không phụ thuộc vào", a: ["điện tích của tụ.", "khoảng cách giữa hai bản.", "diện tích bản tụ.", "bản chất điện môi."], c: 0, exp: "Điện dung $C$ phụ thuộc cấu tạo hình học và môi trường, không phụ thuộc $Q$ hay $U$.", hint: "C là hằng số đặc trưng cấu tạo." },
+                { q: "Ghép song song hai tụ điện $C_1$ và $C_2$ thì điện dung bộ tụ là", a: ["$C_b = C_1 + C_2$.", "$C_b = |C_1 - C_2|$.", "$1/C_b = 1/C_1 + 1/C_2$.", "$C_b = \\sqrt{C_1C_2}$."], c: 0, exp: "Ghép song song làm tăng diện tích đối diện hiệu dụng, nên các giá trị điện dung cộng lại.", hint: "Song song thì cộng C." },
+                { q: "Một microfara ($1\\ \\mu F$) bằng bao nhiêu Fara?", a: ["$10^{-6}\\ F$.", "$10^{-3}\\ F$.", "$10^{-9}\\ F$.", "$10^{-12}\\ F$."], c: 0, exp: "Tiền tố micro ($\\mu$) tương ứng với $10^{-6}$.", hint: "Một phần triệu." },
+                { q: "Kí hiệu của tụ điện trong sơ đồ mạch điện là", a: ["hai vạch thẳng song song độ dài bằng nhau.", "vạch dài vạch ngắn song song.", "hình tròn có dấu X.", "đường gấp khúc ziczac."], c: 0, exp: "Mô tả hai bản cực giống nhau đặt song song.", hint: "Hai bản tụ giống hệt nhau." },
+                { q: "Đơn vị của điện tích $Q$ là", a: ["Culông (C).", "Vôn (V).", "Fara (F).", "Jun (J)."], c: 0, exp: "Điện tích đo bằng Culông.", hint: "Tên nhà bác học Coulomb." },
+                { q: "Đặc điểm của điện trường trong lòng tụ điện phẳng là", a: ["điện trường đều.", "điện trường xoáy.", "điện trường biến thiên.", "điện trường không đều."], c: 0, exp: "Giữa hai bản phẳng song song, các đường sức là các đường thẳng song song cách đều.", hint: "Mọi điểm có cường độ bằng nhau." },
+                { q: "Công thức tính năng lượng tụ điện là", a: ["$W = \\frac{1}{2} CU^2$.", "$W = CU^2$.", "$W = \\frac{1}{2} C^2U$.", "$W = \\frac{1}{2} U^2/C$."], c: 0, exp: "Năng lượng tỉ lệ thuận với bình phương hiệu điện thế.", hint: "Tương tự công thức động năng." },
+                { q: "Khi tăng hiệu điện thế giữa hai bản tụ lên 2 lần thì điện dung của tụ sẽ", a: ["không đổi.", "tăng 2 lần.", "giảm 2 lần.", "tăng 4 lần."], c: 0, exp: "$C$ chỉ phụ thuộc cấu tạo, không phụ thuộc $U$.", hint: "C là đặc tính riêng của tụ." },
+                { q: "Thiết bị nào sau đây dùng tụ điện để tích trữ năng lượng phóng đèn?", a: ["Đèn flash máy ảnh.", "Bàn là điện.", "Bếp điện.", "Bóng đèn sợi đốt."], c: 0, exp: "Tụ điện phóng điện nhanh cung cấp năng lượng lớn trong thời gian ngắn cho đèn flash.", hint: "Cần phóng điện cực nhanh." },
+                { q: "Ghép nối tiếp hai tụ $C_1$ và $C_2$ giống nhau ($C_1 = C_2 = C$) thì điện dung bộ là", a: ["$C/2$.", "$2C$.", "$C$.", "$C^2$."], c: 0, exp: "Nối tiếp: $1/C_b = 1/C + 1/C = 2/C \\Rightarrow C_b = C/2$.", hint: "Nối tiếp làm giảm điện dung." },
+                { q: "Hằng số điện môi $\\varepsilon$ của chân không là", a: ["1.", "0.", "8,85.", "$9 \\cdot 10^9$."], c: 0, exp: "Chân không được chọn làm chuẩn với $\\varepsilon = 1$.", hint: "Giá trị nhỏ nhất." },
+                { q: "Tụ điện xoay là loại tụ có thể thay đổi", a: ["điện dung.", "hiệu điện thế.", "điện tích.", "điện môi."], c: 0, exp: "Bằng cách xoay các bản để thay đổi diện tích đối diện, ta thay đổi được $C$.", hint: "Thay đổi khả năng chứa điện." },
+                { q: "Đơn vị Nanofara (nF) bằng", a: ["$10^{-9}\\ F$.", "$10^{-6}\\ F$.", "$10^{-12}\\ F$.", "$10^{-3}\\ F$."], c: 0, exp: "Nano tương ứng $10^{-9}$.", hint: "Một phần tỉ." },
+                { q: "Khi rút tụ điện khỏi nguồn rồi tăng khoảng cách hai bản, đại lượng nào KHÔNG đổi?", a: ["Điện tích $Q$.", "Hiệu điện thế $U$.", "Điện dung $C$.", "Cường độ $E$."], c: 0, exp: "Khi ngắt nguồn, điện tích bị cô lập nên không thay đổi.", hint: "Điện tích không có chỗ thoát." },
+                { q: "Nếu nối tụ điện vào nguồn DC, sau khi tích đầy, dòng điện qua tụ là", a: ["bằng 0.", "rất lớn.", "không đổi.", "xoay chiều."], c: 0, exp: "Tụ ngăn dòng điện một chiều sau khi đã tích đầy.", hint: "Tụ cách điện hoàn toàn với DC." },
+                { q: "Đồ thị biểu diễn mối liên hệ giữa $Q$ và $U$ của một tụ điện là", a: ["đường thẳng qua gốc tọa độ.", "đường parabol.", "đường hyperbol.", "đường tròn."], c: 0, exp: "Vì $Q = CU$ ($C$ hằng số) nên $Q$ tỉ lệ thuận với $U$.", hint: "Hàm bậc nhất $y = ax$." },
+                { q: "Công suất phóng điện của tụ điện phụ thuộc vào", a: ["thời gian phóng điện.", "khối lượng bản tụ.", "màu sắc vỏ tụ.", "độ cao đặt tụ."], c: 0, exp: "$P = W/t$, thời gian $t$ càng nhỏ công suất càng lớn.", hint: "Liên quan đến tốc độ giải phóng năng lượng." },
+                { q: "Tụ hóa là loại tụ điện", a: ["có phân cực âm dương.", "không có điện môi.", "không tích được điện.", "chỉ dùng cho điện cao áp."], c: 0, exp: "Tụ hóa có cực tính, phải mắc đúng chiều nguồn điện.", hint: "Phải để ý cực tính khi lắp." },
+                { q: "Để tăng điện dung của tụ điện phẳng, ta có thể", a: ["giảm khoảng cách $d$.", "giảm diện tích $S$.", "giảm hằng số điện môi.", "tăng hiệu điện thế $U$."], c: 0, exp: "$C$ tỉ lệ nghịch với $d$ nên giảm $d$ sẽ tăng $C$.", hint: "Đưa hai bản lại gần nhau hơn." }
             ],
             tf: [
                 {
-                    lead: "Một tụ điện phẳng có điện môi không khí, được nối vào nguồn điện hiệu điện thế U.",
+                    lead: "Một tụ điện phẳng có điện môi không khí ($\\varepsilon=1$), diện tích mỗi bản là $S$, khoảng cách hai bản là $d$. Tụ được nối với nguồn điện hiệu điện thế $U$ không đổi.",
                     items: [
-                        { text: "Nếu đưa tấm thủy tinh ($\\varepsilon > 1$) vào giữa hai bản, điện dung tụ sẽ tăng.", c: true, exp: "Đúng, vì điện dung tỉ lệ thuận với $\\varepsilon$." },
-                        { text: "Điện tích của tụ tỉ lệ thuận với điện dung C.", c: true, exp: "Đúng, $Q = CU$." },
-                        { text: "Nếu rút tụ ra khỏi nguồn, hiệu điện thế giữa hai bản sẽ ngay lập tức về 0.", c: false, exp: "Sai, tụ vẫn giữ điện tích nên vẫn duy trì hiệu điện thế." },
-                        { text: "Năng lượng điện trường tỉ lệ với hiệu điện thế U.", c: false, exp: "Sai, năng lượng tỉ lệ với bình phương của U." }
+                        { text: "Nếu tăng diện tích $S$ lên 2 lần thì điện dung $C$ tăng 2 lần.", c: true, exp: "Đúng, $C$ tỉ lệ thuận với diện tích đối diện $S$." },
+                        { text: "Nếu đưa một tấm điện môi ($\\varepsilon > 1$) vào giữa hai bản thì điện tích $Q$ của tụ sẽ giảm.", c: false, exp: "Sai, $\\varepsilon$ tăng $\Rightarrow C$ tăng $\Rightarrow Q = CU$ tăng (do $U$ không đổi)." },
+                        { text: "Nếu tăng khoảng cách $d$ giữa hai bản thì năng lượng tụ giảm.", c: true, exp: "Đúng, $d$ tăng $\Rightarrow C$ giảm $\Rightarrow W = \\frac{1}{2} CU^2$ giảm." },
+                        { text: "Điện dung của tụ điện tỉ lệ nghịch với hiệu điện thế $U$ của nguồn.", c: false, exp: "Sai, $C$ là hằng số cấu tạo, không phụ thuộc $U$." }
                     ],
-                    hint: "Liên hệ cấu tạo và tính chất nạp/xả."
+                    hint: "Nhớ công thức cấu tạo tụ phẳng và công thức $Q=CU$."
                 },
                 {
-                    lead: "Trên vỏ tụ điện ghi $100 \\mu F - 16 V$.",
+                    lead: "Xét các phát biểu về tụ điện và các ứng dụng thực tế.",
                     items: [
-                        { text: "Điện dung định mức của tụ là $100 \\mu F$.", c: true, exp: "Đúng, đây là thông số kỹ thuật ghi trên vỏ." },
-                        { text: "Tụ có thể hoạt động an toàn ở điện áp $25 V$.", c: false, exp: "Sai, quá áp $16 V$ sẽ làm đánh thủng tụ." },
-                        { text: "Điện tích tối đa tụ tích được là $1,6 mC$.", c: true, exp: "Đúng, $Q = 100.10^{-6} \\times 16 = 1,6 mC$." },
-                        { text: "Năng lượng tối đa tích trữ là $12,8 mJ$.", c: true, exp: "Đúng, $W = 0,5 \\times 100.10^{-6} \\times 16^2 = 12,8 mJ$." }
+                        { text: "Tụ điện có thể cho dòng điện một chiều đi qua lớp điện môi.", c: false, exp: "Sai, điện môi là chất cách điện, ngăn dòng DC." },
+                        { text: "Đèn flash máy ảnh sử dụng tụ điện để phóng điện tức thời.", c: true, exp: "Đúng, đây là ứng dụng phổ biến để tạo luồng sáng mạnh." },
+                        { text: "Khi ghép nối tiếp nhiều tụ, điện dung của bộ luôn nhỏ hơn điện dung của từng tụ thành phần.", c: true, exp: "Đúng, theo quy tắc nghịch đảo $1/C_b = \\sum 1/C_i$." },
+                        { text: "Năng lượng của tụ điện đo bằng đơn vị Vôn (V).", c: false, exp: "Sai, năng lượng đo bằng Jun (J)." }
                     ],
-                    hint: "Các thông số vỏ tụ là giới hạn định mức."
+                    hint: "Rà soát tính chất vật lí cơ bản của tụ."
                 },
                 {
-                    lead: "Xét tụ điện phẳng trong môi trường dầu hỏa.",
+                    lead: "Một học sinh thực hành đo điện dung của một tụ điện hóa.",
                     items: [
-                        { text: "Hằng số điện môi của dầu hỏa luôn lớn hơn 1.", c: true, exp: "Đúng, mọi môi trường vật chất đều có $\\varepsilon > 1$." },
-                        { text: "Khi rút tụ khỏi dầu, điện dung của tụ sẽ tăng lên.", c: false, exp: "Sai, ra không khí $\\varepsilon$ giảm nên C giảm." },
-                        { text: "Hai bản tụ tích điện trái dấu nhưng có độ lớn khác nhau.", c: false, exp: "Sai, hai bản luôn tích điện cùng độ lớn." },
-                        { text: "Điện trường trong lòng tụ là điện trường đều.", c: true, exp: "Đúng, đặc điểm của tụ phẳng." }
+                        { text: "Học sinh phải mắc cực dương của tụ với cực dương của nguồn.", c: true, exp: "Đúng, tụ hóa có phân cực nên cần mắc đúng chiều." },
+                        { text: "Có thể đo điện dung bằng cách đo $Q$ và $U$ rồi lập tỉ số.", c: true, exp: "Đúng, đây là phương pháp định nghĩa." },
+                        { text: "Điện dung của tụ hóa thay đổi theo thời gian nạp điện.", c: false, exp: "Sai, điện dung là thông số cố định của cấu tạo." },
+                        { text: "Nếu mắc ngược cực, tụ có thể bị hỏng hoặc nổ.", c: true, exp: "Đúng, hiện tượng này rất phổ biến với tụ hóa." }
                     ],
-                    hint: "Hằng số điện môi ảnh hưởng trực tiếp đến C."
+                    hint: "Lưu ý về cách sử dụng tụ hóa thực tế."
                 },
                 {
-                    lead: "Ghép tụ điện nối tiếp và song song.",
+                    lead: "Về hằng số điện môi $\\varepsilon$ của các môi trường.",
                     items: [
-                        { text: "Ghép song song để tăng điện dung của cả bộ.", c: true, exp: "Đúng, $C_p = C_1 + C_2$." },
-                        { text: "Ghép nối tiếp thì hiệu điện thế các tụ bằng nhau.", c: false, exp: "Sai, hiệu điện thế chia theo tỉ lệ nghịch điện dung." },
-                        { text: "Ghép nối tiếp làm giảm điện dung của bộ tụ.", c: true, exp: "Đúng, điện dung bộ nhỏ hơn mọi tụ thành phần." },
-                        { text: "Ghép song song cho phép chịu áp cao hơn.", c: false, exp: "Sai, nối tiếp mới tăng khả năng chịu áp." }
+                        { text: "$\\varepsilon$ của nước nguyên chất xấp xỉ bằng 81.", c: true, exp: "Đúng, đây là giá trị chuẩn trong SGK." },
+                        { text: "$\\varepsilon$ của mọi chất cách điện luôn lớn hơn 1.", c: true, exp: "Đúng, chân không là môi trường có $\\varepsilon$ nhỏ nhất bằng 1." },
+                        { text: "$\\varepsilon$ của kim loại dẫn điện là vô cùng lớn.", c: false, exp: "Sai, hằng số điện môi chỉ định nghĩa cho chất cách điện." },
+                        { text: "Khi thay không khí bằng dầu hỏa ($\\varepsilon=2$), điện dung tụ phẳng tăng 2 lần.", c: true, exp: "Đúng, $C$ tỉ lệ thuận với $\\varepsilon$." }
                     ],
-                    hint: "Quy tắc cộng dồn trong ghép tụ."
+                    hint: "Đặc điểm của điện môi."
+                },
+                {
+                    lead: "Xét tụ điện phẳng được ngắt ra khỏi nguồn điện sau khi tích điện.",
+                    items: [
+                        { text: "Điện tích trên các bản tụ không thay đổi.", c: true, exp: "Đúng, vì hệ cô lập về điện." },
+                        { text: "Nếu tăng $d$ thì hiệu điện thế $U$ giữa hai bản tăng.", c: true, exp: "Đúng, $d$ tăng $\Rightarrow C$ giảm $\Rightarrow U = Q/C$ tăng." },
+                        { text: "Cường độ điện trường giữa hai bản tụ tăng khi $d$ tăng.", c: false, exp: "Sai, $E = U/d = Q/(Cd)$ không đổi khi ngắt nguồn." },
+                        { text: "Năng lượng của tụ điện không đổi.", c: false, exp: "Sai, ngoại lực làm công nên năng lượng $W = Q^2/(2C)$ tăng." }
+                    ],
+                    hint: "Phân tích trạng thái cô lập (ngắt nguồn)."
+                },
+                {
+                    lead: "Sử dụng tụ điện trong mạch điện tử gia dụng.",
+                    items: [
+                        { text: "Tụ điện được dùng để lọc nhiễu trong các bộ nguồn.", c: true, exp: "Đúng, tụ cho dòng xoay chiều nhiễu đi qua và giữ lại dòng DC." },
+                        { text: "Trong quạt điện, tụ giúp tạo lệch pha để khởi động động cơ.", c: true, exp: "Đúng, đây là tụ khởi động." },
+                        { text: "Có thể thay thế tụ $1000\\ V$ bằng tụ $16\\ V$ trong mọi trường hợp.", c: false, exp: "Sai, tụ $16\\ V$ sẽ bị nổ nếu dùng ở điện áp cao hơn giới hạn." },
+                        { text: "Tụ điện lưu trữ điện tích vô hạn.", c: false, exp: "Sai, mỗi tụ có điện tích giới hạn $Q = CU_{max}$." }
+                    ],
+                    hint: "Ứng dụng thực tế của tụ điện."
+                },
+                {
+                    lead: "Về năng lượng điện trường trong tụ điện.",
+                    items: [
+                        { text: "Năng lượng tụ điện tỉ lệ thuận với điện dung $C$.", c: true, exp: "Đúng, $W = 0,5CU^2$." },
+                        { text: "Năng lượng tụ điện tỉ lệ thuận với hiệu điện thế $U$.", c: false, exp: "Sai, tỉ lệ với bình phương $U$." },
+                        { text: "Khi tụ phóng điện, năng lượng điện trường chuyển hóa thành các dạng khác.", c: true, exp: "Đúng, thường là nhiệt năng hoặc quang năng." },
+                        { text: "Đơn vị năng lượng điện trường là Jun (J).", c: true, exp: "Đúng, đơn vị chuẩn SI cho năng lượng." }
+                    ],
+                    hint: "Công thức tính công và năng lượng."
+                },
+                {
+                    lead: "Các loại tụ điện phổ biến.",
+                    items: [
+                        { text: "Tụ giấy có lớp điện môi là giấy tẩm dầu cách điện.", c: true, exp: "Đúng, tên gọi theo lớp điện môi." },
+                        { text: "Tụ gốm thường có điện dung rất lớn (hàng mF).", c: false, exp: "Sai, tụ gốm thường có điện dung nhỏ (pF - nF)." },
+                        { text: "Tụ hóa bắt buộc phải mắc đúng cực.", c: true, exp: "Đúng, do cấu tạo hóa học đặc thù." },
+                        { text: "Tụ xoay thay đổi điện dung bằng cách thay đổi khoảng cách $d$.", c: false, exp: "Sai, thay đổi diện tích đối diện $S$." }
+                    ],
+                    hint: "Nhận biết các loại linh kiện tụ điện."
                 }
             ],
             short: [
-                { q: "Tụ điện $C = 10 \\mu F$ tích điện dưới $U = 20 V$. Tính điện tích $Q$ của tụ (đơn vị mC, làm tròn 1 chữ số)?", a: "0,2", exp: "$Q = CU = 200 \\mu C = 0,2 mC$.", hint: "Tính tích $C \cdot U$ rồi đổi đơn vị." },
-                { q: "Tính năng lượng (mJ) của tụ $C = 50 \\mu F$ khi hiệu điện thế giữa hai bản là $10 V$?", a: "2,5", exp: "$W = 0,5 CU^2 = 0,5 \\times 50.10^{-6} \\times 100 = 2,5 mJ$.", hint: "Sử dụng $W = 0,5 CU^2$." },
-                { q: "Một tụ phẳng không khí $2 pF$. Nhúng vào điện môi $\\varepsilon = 4$ thì điện dung mới là bao nhiêu pF?", a: "8", exp: "$C = \\varepsilon C_0 = 4 \\times 2 = 8 pF$.", hint: "Điện dung tăng gấp $\\varepsilon$ lần." },
-                { q: "Xét nhận định:\n1. 'Fara là đơn vị điện dung C'.\n2. 'Tụ ngăn dòng 1 chiều DC'.\n3. 'Tụ tích từ trường'.\n4. 'C tỉ lệ thuận d'.\n5. 'Q tỉ lệ thuận U'.\n6. '$1\\mu F = 10^{-6} F$'.\n7. 'Năng lượng là $QU$'.\n8. 'Ghép song song giảm C'.\nChọn câu ĐÚNG ghi dãy số tăng dần.", a: "1256", exp: "Đúng: 1, 2, 5, 6. Sai: 3 (điện trường), 4 (nghịch d), 7 ($1/2 QU$), 8 (giảm).", hint: "Rà soát định nghĩa và đơn vị Vật lí." }
+                { q: "Một tụ điện có điện dung $20\\ \\mu F$ được tích điện đến hiệu điện thế $100\\ V$. Tính điện tích $Q$ của tụ (đơn vị mC, làm tròn 1 chữ số)?", a: "2", exp: "$Q = CU = 20 \\cdot 10^{-6} \\cdot 100 = 2 \\cdot 10^{-3}\\ C = 2\\ mC$.", hint: "$Q = C$ nhân $U$, lưu ý đổi đơn vị." },
+                { q: "Tính năng lượng tích trữ (đơn vị mJ) của tụ điện $C = 10\\ \\mu F$ khi hiệu điện thế là $20\\ V$?", a: "2", exp: "$W = \\frac{1}{2} CU^2 = 0,5 \\cdot 10 \\cdot 10^{-6} \\cdot 400 = 2 \\cdot 10^{-3}\\ J = 2\\ mJ$.", hint: "Sử dụng công thức $\\frac{1}{2} CU^2$." },
+                { q: "Một tụ điện phẳng có diện tích bản $S = 1\\ m^2$, khoảng cách $d = 1\\ mm$, điện môi không khí. Tính điện dung $C$ của nó theo đơn vị nF (lấy $\\varepsilon_0 = 8,85 \\cdot 10^{-12}\\ F/m$, làm tròn số nguyên)?", a: "9", exp: "$C = \\varepsilon_0 S / d = 8,85 \\cdot 10^{-12} \\cdot 1 / 0,001 \\approx 8,85 \\cdot 10^{-9}\\ F \\approx 9\\ nF$.", hint: "Công thức $C = \\varepsilon_0 S / d$." },
+                { q: "Xét các nhận định:\n1. 'Đơn vị $C$ là Fara'.\n2. '$Q$ tỉ lệ thuận $U$'.\n3. 'Tụ ngăn dòng AC'.\n4. '$W = \\frac{1}{2} CU$'.\n5. '$C$ không phụ thuộc $Q$'.\n6. 'Ghép song song làm tăng $C$'.\nChọn các nhận định ĐÚNG rồi ghi đáp án dãy số tăng dần.", a: "1256", exp: "Đúng: 1, 2, 5, 6. Sai: 3 (ngăn DC), 4 (thiếu bình phương $U$).", hint: "Kiểm tra kỹ từng định nghĩa." },
+                { q: "Cho bộ tụ gồm hai tụ $C_1 = 3\\ \\mu F$ và $C_2 = 6\\ \\mu F$ ghép nối tiếp. Tính điện dung của bộ tụ (đơn vị $\\mu F$)?", a: "2", exp: "$1/C_b = 1/3 + 1/6 = 1/2 \\Rightarrow C_b = 2\\ \\mu F$.", hint: "Nối tiếp dùng công thức nghịch đảo." },
+                { q: "Một tụ điện $5\\ \\mu F$ tích được điện tích $Q = 0,5\\ mC$. Hiệu điện thế giữa hai bản tụ là bao nhiêu Vôn (V)?", a: "100", exp: "$U = Q/C = 0,5 \\cdot 10^{-3} / (5 \\cdot 10^{-6}) = 100\\ V$.", hint: "Biến đổi từ $Q = CU$." },
+                { q: "Khi năng lượng của tụ tăng lên 4 lần thì hiệu điện thế giữa hai bản tụ đã tăng lên mấy lần?", a: "2", exp: "Vì $W$ tỉ lệ với $U^2$ nên $W$ tăng 4 thì $U$ tăng $\\sqrt{4} = 2$.", hint: "Mối liên hệ năng lượng và hiệu điện thế." },
+                { q: "Tính tổng điện năng (đơn vị mJ) của hai tụ $C_1 = 2\\ \\mu F, C_2 = 4\\ \\mu F$ khi ghép song song và nối vào nguồn $10\\ V$?", a: "0,3", exp: "$C_b = 6\\ \\mu F$. $W = 0,5 \\cdot 6 \\cdot 10^{-6} \\cdot 100 = 0,3\\ mJ$.", hint: "Tính $C_b$ song song trước." }
             ]
         };
 
-        let gameState = {
-            user: { name: "", sbd: "", class: "", school: "" },
-            currentLevel: 0,
-            questions: [],
-            score: 0,
-            timer: 180,
-            timerInterval: null,
-            lifelines: { 5050: true, audience: true, phone: true },
-            history: [],
-            isGameOver: false,
-            tempSelections: [],
-            gameMode: 'practice'
-        };
-
-        function renderMath() {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise().catch(e => {});
-            }
-        }
-
-        const playSound = (type) => {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
-                if (type === 'pingpong') { osc.type = 'sine'; osc.frequency.setValueAtTime(880, ctx.currentTime); gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2); osc.start(); osc.stop(ctx.currentTime + 0.2); }
-                else if (type === 'correct') { osc.type = 'triangle'; osc.frequency.setValueAtTime(523, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(1046, ctx.currentTime + 0.5); gain.gain.setValueAtTime(0.1, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.5); }
-                else if (type === 'wrong') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, ctx.currentTime); osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.5); gain.gain.setValueAtTime(0.1, ctx.currentTime); osc.start(); osc.stop(ctx.currentTime + 0.5); }
-            } catch(e) {}
-        };
-
-        function setupAntiCheat() {
-            const check = () => {
-                if (gameState.gameMode === 'official' && !gameState.isGameOver && document.hidden) violationDetected();
-            };
-            document.addEventListener('visibilitychange', check);
-            window.onblur = () => {
-                if (gameState.gameMode === 'official' && !gameState.isGameOver) {
-                    setTimeout(() => { if (!document.hasFocus()) violationDetected(); }, 1200);
-                }
-            };
-        }
-
-        function violationDetected() {
-            if (gameState.isGameOver) return;
-            gameState.isGameOver = true;
-            clearInterval(gameState.timerInterval);
-            playSound('wrong');
-            document.getElementById('screen-game').classList.add('hidden-screen');
-            document.getElementById('screen-result').classList.remove('hidden-screen');
-            document.getElementById('result-title').innerText = "KẾT THÚC VÌ VI PHẠM";
-            document.getElementById('result-title').className = "text-4xl font-bold text-red-500 mb-4 uppercase";
-            document.getElementById('result-text').innerHTML = `<span class="text-red-400 font-bold block p-4 border-2 border-red-500 rounded-xl bg-red-50">Bạn đã vi phạm quy chế, không được rời khỏi màn hình này khi đang NGỒI GHẾ NÓNG</span>`;
-            document.getElementById('btn-history').classList.add('hidden');
-        }
+        let state = { user: {}, questions: [], currentIdx: 0, timer: 180, interval: null, lifelines: { '5050': true, 'audience': true, 'phone': true }, history: [], isOfficial: false, isFinished: false, tempTF: [null, null, null, null] };
+        let adminData = [];
 
         function init() {
-         localStorage.clear();
-			const saved = sessionStorage.getItem('altp_user');
+            renderLadder();
+            const saved = localStorage.getItem('altp_user_v11');
             if (saved) {
                 const u = JSON.parse(saved);
-                document.getElementById('input-name').value = u.name || "";
-                document.getElementById('input-sbd').value = u.sbd || "";
-                document.getElementById('input-class').value = u.class || "";
-                document.getElementById('input-school').value = u.school || "";
+                document.getElementById('input-name').value = u.name || '';
+                document.getElementById('input-sbd').value = u.sbd || '';
+                document.getElementById('input-class').value = u.class || '';
+                document.getElementById('input-school').value = u.school || '';
             }
-            renderLadder();
-            setupAntiCheat();
-            const btnOff = document.querySelector('button[onclick*="official"]');
-            btnOff.onmouseenter = () => document.getElementById('cheat-warning').style.opacity = 1;
-            btnOff.onmouseleave = () => document.getElementById('cheat-warning').style.opacity = 0;
+            document.addEventListener("visibilitychange", () => {
+                if (state.isOfficial && !state.isFinished && document.hidden) autoSubmitViolation();
+            });
         }
 
         function renderLadder() {
             const ladder = document.getElementById('points-ladder');
             ladder.innerHTML = '';
-            pointsConfig.forEach((p, i) => {
+            POINTS.forEach((p, i) => {
                 const div = document.createElement('div');
-                div.className = `ladder-item flex justify-between items-center ${i === 4 ? 'milestone-5' : ''} ${i === 9 ? 'milestone-10' : ''} ${i === 19 ? 'milestone-20' : ''}`;
+                div.className = `ladder-item ${i === 4 ? 'milestone-5' : ''} ${i === 9 ? 'milestone-10' : ''} ${i === 19 ? 'milestone-20' : ''}`;
                 div.id = `ladder-${i}`;
                 div.innerHTML = `<span>${i+1}</span><span>${p.toFixed(1)}</span>`;
                 ladder.appendChild(div);
             });
         }
 
-    function startGame(mode) {
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                if (type === 'click') { osc.frequency.setValueAtTime(800, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1); osc.start(); osc.stop(ctx.currentTime + 0.1); }
+                else if (type === 'correct') { osc.frequency.setValueAtTime(500, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.5); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5); osc.start(); osc.stop(ctx.currentTime + 0.5); }
+                else if (type === 'wrong') { osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.5); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5); osc.start(); osc.stop(ctx.currentTime + 0.5); }
+            } catch(e) {}
+        }
+
+        function startGame(mode) {
             const name = document.getElementById('input-name').value;
             const sbd = document.getElementById('input-sbd').value;
-            const cls = document.getElementById('input-class').value;
-            const sch = document.getElementById('input-school').value;
-            if (!name || !sbd) return alert("Vui lòng nhập đầy đủ thông tin!");
-            
-            gameState.user = { name, sbd, class: cls, school: sch };
-            sessionStorage.setItem('altp_user', JSON.stringify(gameState.user));
-            gameState.gameMode = mode;
-            gameState.currentLevel = 0;
-            gameState.isGameOver = false;
-            gameState.history = [];
-            gameState.lifelines = { 5050: true, audience: true, phone: true };
-            
-            // 🔥 XÁO TRỘN CÂU HỎI MỖI LẦN CHƠI
-            const shuffledMcqs = [...questionBank.mcq].sort(() => Math.random() - 0.5).slice(0, 12).map(q => ({...q, type:'mcq'}));
-            const shuffledTfs = [...questionBank.tf].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'tf'}));
-            const shuffledShorts = [...questionBank.short].sort(() => Math.random() - 0.5).slice(0, 4).map(q => ({...q, type:'short'}));
-            
-            gameState.questions = [...shuffledMcqs, ...shuffledTfs, ...shuffledShorts];
-
+            if (!name || !sbd) return alert("Vui lòng nhập Họ tên và SBD!");
+            state.user = { name, sbd, class: document.getElementById('input-class').value, school: document.getElementById('input-school').value };
+            localStorage.setItem('altp_user_v11', JSON.stringify(state.user));
+            state.isOfficial = (mode === 'official');
+            state.currentIdx = 0; state.isFinished = false; state.history = []; state.lifelines = { '5050': true, 'audience': true, 'phone': true };
+            const mcqs = [...DB.mcq].sort(() => 0.5 - Math.random()).slice(0, 12).map(v => ({...v, type:'mcq'}));
+            const tfs = [...DB.tf].sort(() => 0.5 - Math.random()).slice(0, 4).map(v => ({...v, type:'tf'}));
+            const shorts = [...DB.short].sort(() => 0.5 - Math.random()).slice(0, 4).map(v => ({...v, type:'short'}));
+            state.questions = [...mcqs, ...tfs, ...shorts];
             document.getElementById('screen-login').classList.add('hidden-screen');
             document.getElementById('game-header').classList.remove('hidden-screen');
             document.getElementById('points-ladder').classList.remove('hidden-screen');
             document.getElementById('screen-game').classList.remove('hidden-screen');
-            document.getElementById('screen-result').classList.add('hidden-screen');
-            
-            const badge = document.getElementById('display-mode');
-            badge.innerText = mode === 'official' ? 'Ghế Nóng' : 'Luyện Tập';
-            badge.className = mode === 'official' ? 'ml-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-red-600' : 'ml-2 px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-green-600';
-            document.getElementById('display-info').innerText = `${name} - SBD: ${sbd}`;
-            
+            document.getElementById('display-info').innerText = `${state.user.name} - SBD: ${state.user.sbd}`;
+            document.getElementById('display-school').innerText = `${state.user.class} | ${state.user.school}`;
             loadQuestion();
         }
+
         function loadQuestion() {
-            clearInterval(gameState.timerInterval);
-            gameState.timer = 180; updateTimerUI(); startTimer();
-
-            const q = gameState.questions[gameState.currentLevel];
-            document.getElementById('question-text').innerHTML = `Câu ${gameState.currentLevel + 1}: ${q.type === 'tf' ? q.lead : q.q}`;
+            clearInterval(state.interval);
+            state.timer = 180; updateTimerUI();
+            state.interval = setInterval(() => { state.timer--; updateTimerUI(); if(state.timer <= 0) { clearInterval(state.interval); autoSubmitTimeout(); } }, 1000);
             
-            const grid = document.getElementById('answers-grid');
-            const tf = document.getElementById('tf-area');
-            const sh = document.getElementById('short-area');
-            const hint = document.getElementById('lifeline-hint');
-            
-            grid.innerHTML = ''; tf.innerHTML = ''; hint.classList.add('hidden');
-            grid.classList.add('hidden'); tf.classList.add('hidden'); sh.classList.add('hidden');
+            const q = state.questions[state.currentIdx];
+            if (!q) { finishGame(true); return; }
 
+            document.getElementById('question-text').innerHTML = `Câu ${state.currentIdx + 1}: ${q.type === 'tf' ? q.lead : q.q}`;
+            document.getElementById('hint-box').classList.add('hidden');
             document.querySelectorAll('.ladder-item').forEach(el => el.classList.remove('ladder-active'));
-            document.getElementById(`ladder-${gameState.currentLevel}`).classList.add('ladder-active');
-
+            document.getElementById(`ladder-${state.currentIdx}`).classList.add('ladder-active');
+            
+            const mcqArea = document.getElementById('mcq-area'); const tfArea = document.getElementById('tf-area'); const shortArea = document.getElementById('short-area');
+            mcqArea.innerHTML = ''; tfArea.innerHTML = ''; mcqArea.classList.add('hidden'); tfArea.classList.add('hidden'); shortArea.classList.add('hidden');
+            
             if (q.type === 'mcq') {
-                grid.classList.remove('hidden');
-                q.shuffled = q.a.map((t, i) => ({t, i})).sort(() => 0.5 - Math.random());
+                mcqArea.classList.remove('hidden'); q.shuffled = q.a.map((txt, i) => ({txt, i})).sort(() => 0.5 - Math.random());
                 q.shuffled.forEach((opt, idx) => {
-                    const b = document.createElement('button');
-                    b.className = 'btn-answer';
-                    b.innerHTML = `${String.fromCharCode(65+idx)}. ${opt.t}`;
-                    b.onclick = () => { playSound('pingpong'); document.querySelectorAll('.btn-answer').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); gameState.selectedIdx = idx; };
-                    grid.appendChild(b);
+                    const btn = document.createElement('button'); btn.className = 'btn-answer'; btn.innerHTML = `<span class='font-bold mr-3'>${String.fromCharCode(65+idx)}.</span> <span>${opt.txt}</span>`;
+                    btn.onclick = () => { playSound('click'); state.selectedMCQ = idx; document.querySelectorAll('.btn-answer').forEach((b, i) => b.classList.toggle('selected', i === idx)); };
+                    mcqArea.appendChild(btn);
                 });
+                state.selectedMCQ = null;
             } else if (q.type === 'tf') {
-                tf.classList.remove('hidden');
-                gameState.tempSelections = [null, null, null, null];
-                q.items.forEach((it, idx) => {
-                    const row = document.createElement('div');
-                    row.className = "flex justify-between items-center bg-black/20 p-3 rounded mb-2 border border-blue-500/20";
-                    row.innerHTML = `<div class='pr-4 text-sm'>${String.fromCharCode(97+idx)}) ${it.text}</div><div class='flex gap-2 shrink-0'><button id='t-${idx}' class='px-4 py-1 bg-gray-500 rounded text-xs font-bold uppercase'>Đúng</button><button id='f-${idx}' class='px-4 py-1 bg-gray-500 rounded text-xs font-bold uppercase'>Sai</button></div>`;
-                    tf.appendChild(row);
-                    row.querySelector(`#t-${idx}`).onclick = () => { playSound('pingpong'); gameState.tempSelections[idx] = true; row.querySelector(`#t-${idx}`).className = 'px-4 py-1 bg-green-600 rounded text-xs font-bold uppercase'; row.querySelector(`#f-${idx}`).className = 'px-4 py-1 bg-gray-500 rounded text-xs font-bold uppercase'; };
-                    row.querySelector(`#f-${idx}`).onclick = () => { playSound('pingpong'); gameState.tempSelections[idx] = false; row.querySelector(`#t-${idx}`).className = 'px-4 py-1 bg-gray-500 rounded text-xs font-bold uppercase'; row.querySelector(`#f-${idx}`).className = 'px-4 py-1 bg-red-600 rounded text-xs font-bold uppercase'; };
+                tfArea.classList.remove('hidden'); state.tempTF = [null, null, null, null];
+                q.items.forEach((item, idx) => {
+                    const row = document.createElement('div'); row.className = "flex justify-between items-center p-2 bg-white/10 rounded border border-white/10";
+                    row.innerHTML = `<div class="text-[14px] flex-grow pr-4">${String.fromCharCode(97+idx)}) ${item.text}</div><div class="flex gap-2"><button id="tf-t-${idx}" onclick="selectTF(${idx}, true)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Đúng</button><button id="tf-f-${idx}" onclick="selectTF(${idx}, false)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Sai</button></div>`;
+                    tfArea.appendChild(row);
                 });
-            } else {
-                sh.classList.remove('hidden'); document.getElementById('short-input').value = ''; document.getElementById('short-input').focus();
-            }
-
-            document.getElementById('life-5050').style.display = (q.type === 'mcq' && gameState.lifelines['5050']) ? 'block' : 'none';
-            document.getElementById('life-audience').style.display = gameState.lifelines['audience'] ? 'block' : 'none';
-            document.getElementById('life-phone').style.display = gameState.lifelines['phone'] ? 'block' : 'none';
-            document.getElementById('btn-stop').classList.toggle('hidden', gameState.currentLevel < 5);
+            } else { shortArea.classList.remove('hidden'); document.getElementById('short-input').value = ''; document.getElementById('short-input').focus(); }
+            
+            document.getElementById('life-5050').style.display = (q.type === 'mcq' && state.lifelines['5050']) ? 'block' : 'none';
+            document.getElementById('life-audience').style.display = state.lifelines['audience'] ? 'block' : 'none';
+            document.getElementById('life-phone').style.display = state.lifelines['phone'] ? 'block' : 'none';
+            document.getElementById('btn-stop').classList.toggle('hidden', state.currentIdx < 5);
+            
             renderMath();
         }
-        function submitAnswer() {
-            const q = gameState.questions[gameState.currentLevel];
-            let correct = false, uA = "", cA = "", details = {};
-            if (q.type === 'mcq') {
-                if (gameState.selectedIdx === undefined) return alert("Vui lòng chọn đáp án!");
-                const ch = q.shuffled[gameState.selectedIdx];
-                correct = ch.i === q.c;
-                uA = String.fromCharCode(65 + gameState.selectedIdx);
-                cA = String.fromCharCode(65 + q.shuffled.findIndex(x => x.i === q.c));
-                details = { shuffled: q.shuffled, originalCorrect: q.c, userIdx: gameState.selectedIdx };
-            } else if (q.type === 'tf') {
-                if (gameState.tempSelections.includes(null)) return alert("Vui lòng chọn đủ 4 ý!");
-                correct = gameState.tempSelections.every((v, i) => v === q.items[i].c);
-                uA = gameState.tempSelections.map(v => v ? "Đúng" : "Sai").join("|");
-                cA = q.items.map(v => v.c ? "Đúng" : "Sai").join("|");
-                details = { selections: [...gameState.tempSelections], items: q.items };
-            } else {
-                uA = document.getElementById('short-input').value.trim().replace('.', ',');
-                if(!uA) return alert("Nhập đáp án!");
-                correct = uA === q.a; cA = q.a;
-            }
-            gameState.history.push({ 
-                q: q.type==='tf'?q.lead:q.q, isCorrect: correct, userAns: uA, correctAns: cA, 
-                exp: q.exp || (q.items ? q.items.map(x=>x.exp).join("<br>") : ""),
-                type: q.type, details: details
-            });
 
+        function updateTimerUI() {
+            const el = document.getElementById('timer'); el.innerText = `${state.timer}s`;
+            el.className = state.timer <= 15 ? 'text-2xl font-bold timer-warning border-2 border-red-500 px-3 py-1 rounded-full' : 'text-2xl font-bold text-yellow-400 border-2 border-yellow-400 px-3 py-1 rounded-full';
+        }
+
+        function selectTF(idx, val) {
+            playSound('click'); state.tempTF[idx] = val;
+            document.getElementById(`tf-t-${idx}`).className = val ? "w-12 py-1 rounded bg-green-600 text-[10px] font-bold uppercase text-white" : "w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase text-white";
+            document.getElementById(`tf-f-${idx}`).className = !val ? "w-12 py-1 rounded bg-red-600 text-[10px] font-bold uppercase text-white" : "w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase text-white";
+        }
+
+        function useLifeline(type) {
+            if (!state.lifelines[type]) return; playSound('click'); state.lifelines[type] = false; document.getElementById(`life-${type}`).style.display = 'none';
+            const q = state.questions[state.currentIdx]; const box = document.getElementById('hint-box'); box.classList.remove('hidden');
+            if (type === '5050') {
+                const btns = document.querySelectorAll('.btn-answer');
+                const wrong = q.shuffled.map((o, i) => i).filter(i => q.shuffled[i].i !== q.c).sort(() => 0.5 - Math.random()).slice(0, 2);
+                wrong.forEach(idx => btns[idx].style.visibility = 'hidden'); box.innerText = "Đã loại bỏ 2 phương án sai.";
+            } else if (type === 'audience') {
+                if (q.type === 'mcq') { let v = [10, 10, 10, 10]; v[q.shuffled.findIndex(o => o.i === q.c)] = 70; box.innerText = `Khán giả: A(${v[0]}%), B(${v[1]}%), C(${v[2]}%), D(${v[3]}%)`; }
+                else box.innerHTML = `Khán giả: <em>${q.hint}</em>`;
+            } else box.innerHTML = `Người thân: "Đáp án liên quan đến <strong>${q.hint}</strong>"`;
+            renderMath();
+        }
+
+        function processSubmission() {
+            const q = state.questions[state.currentIdx]; let correct = false; let uA = "", cA = "";
+            if (q.type === 'mcq') {
+                if (state.selectedMCQ === null) return alert("Chọn đáp án!");
+                correct = (q.shuffled[state.selectedMCQ].i === q.c); uA = String.fromCharCode(65 + state.selectedMCQ); cA = String.fromCharCode(65 + q.shuffled.findIndex(o => o.i === q.c));
+            } else if (q.type === 'tf') {
+                if (state.tempTF.includes(null)) return alert("Chọn đủ 4 ý!");
+                correct = state.tempTF.every((v, i) => v === q.items[i].c); uA = state.tempTF.map(v => v ? "Đ" : "S").join("|"); cA = q.items.map(v => v.c ? "Đ" : "S").join("|");
+            } else {
+                uA = document.getElementById('short-input').value.trim().replace('.', ','); if (!uA) return alert("Nhập đáp án!");
+                correct = (uA === q.a); cA = q.a;
+            }
+            state.history.push({ question: q.type === 'tf' ? q.lead : q.q, type: q.type, isCorrect: correct, userAns: uA, correctAns: cA, explanation: q.type === 'tf' ? q.items.map(it => `• ${it.text}: ${it.exp}`).join("<br>") : q.exp, details: q.type === 'mcq' ? { shuffled: q.shuffled, userIdx: state.selectedMCQ, correctIdx: q.shuffled.findIndex(o => o.i === q.c) } : (q.type === 'tf' ? { userTF: [...state.tempTF], items: q.items } : null) });
+            
             if (correct) {
                 playSound('correct');
-                if (gameState.currentLevel === 4) {
-                    showModal("VƯỢT QUA MỐC 5 CÂU!", "Chúc mừng Bạn đã vượt qua câu số 5, đạt 5đ. Từ câu 6 trở đi, bạn có thể chọn dừng cuộc chơi để bảo toàn số điểm, nếu trả lời không đúng từ câu 6 đến 10, sẽ quay về mốc 5 điểm. Tiếp tục?", "Tiếp tục", next, 5);
-                } else if (gameState.currentLevel === 9) {
-                    showModal("VƯỢT QUA MỐC 10 CÂU!", "Chúc mừng Bạn đã vượt qua câu số 10, đạt 7đ. Từ câu 11 trở đi, bạn có thể chọn dừng cuộc chơi để bảo toàn số điểm, nếu trả lời không đúng sẽ quay về mốc 7 điểm. Tiếp tục?", "Tiếp tục", next, 10);
-                } else if (gameState.currentLevel === 19) end(true);
-                else next();
-            } else {
-                playSound('wrong'); end(false);
-            }
+                if (state.currentIdx === 4) {
+                    const msg = "Chúc mừng thí sinh đã vượt qua câu hỏi số 5! Điểm của bạn hiện nay là 5 điểm! Nếu bạn thi tiếp thì nhấn vào nút tiếp tục, Nếu bạn quyết định dừng lại thì luôn bảo toàn số điểm, còn nếu bạn chọn đi tiếp mà trả lời sai câu nào thì điểm số quay lại mốc 5 điểm. Bạn đã rõ luật chơi? Mời bạn chọn câu hỏi tiếp theo bằng cách nhấn vào nút TIẾP TỤC";
+                    showMilestone(5, msg, () => { state.currentIdx++; loadQuestion(); });
+                } else if (state.currentIdx === 9) {
+                    const msg = "Chúc mừng thí sinh đã vượt qua câu hỏi số 10! Điểm của bạn hiện nay là 7,0 điểm! Nếu bạn thi tiếp thì nhấn vào nút tiếp tục, Nếu bạn quyết định dừng lại ở bất kì câu hỏi nào thì luôn bảo toàn số điểm, còn nếu bạn chọn đi tiếp mà trả lời sai câu nào thì điểm số quay lại mốc 5 điểm. Bạn đã rõ luật chơi? Mời bạn chọn câu hỏi tiếp theo bằng cách nhấn vào nút TIẾP TỤC";
+                    showMilestone(10, msg, () => { state.currentIdx++; loadQuestion(); });
+                } else if (state.currentIdx === 19) finishGame(true);
+                else { state.currentIdx++; loadQuestion(); }
+            } else { playSound('wrong'); finishGame(false); }
         }
-        function next() { gameState.currentLevel++; gameState.selectedIdx = undefined; loadQuestion(); }
 
-function end(win, manual = false) {
-            gameState.isGameOver = true; 
-            clearInterval(gameState.timerInterval);
-            let score = manual ? pointsConfig[gameState.currentLevel - 1] : (win ? 10 : (gameState.currentLevel < 5 ? 0 : (gameState.currentLevel < 10 ? 5 : 7)));
-            const rank = score >= 9 ? "Xuất sắc" : (score >= 8 ? "Giỏi" : (score >= 6.5 ? "Khá" : (score >= 5 ? "Trung bình" : "Cần cố gắng")));
+        function finishGame(win, manual = false) {
+            state.isFinished = true; clearInterval(state.interval);
+            let score = manual ? POINTS[state.currentIdx - 1] : (win ? 10 : (state.currentIdx < 5 ? 0 : (state.currentIdx < 10 ? 5 : 7)));
             
-            document.getElementById('screen-game').classList.add('hidden-screen');
-            document.getElementById('screen-result').classList.remove('hidden-screen');
-            document.getElementById('result-text').innerHTML = `
-                Chúc mừng <strong>${gameState.user.name}</strong>, SBD: <strong>${gameState.user.sbd}</strong>, Lớp: <strong>${gameState.user.class}</strong>, Trường: <strong>${gameState.user.school}</strong> đã hoàn thành cuộc thi với số điểm <strong>${score.toFixed(1)}</strong>, xếp loại <strong>${rank}</strong>.<br>
-                <span class="italic text-yellow-400 mt-4 block">Có thể làm lại để khẳng định đẳng cấp!</span>
-            `;
-            if (score >= 5) startFireworks();
-
-            // 🔥 Gửi dữ liệu lên Firebase
-            if (typeof window.saveResult === 'function') {
-                window.saveResult({
-                    name: gameState.user.name,
-                    sbd: gameState.user.sbd,
-                    class: gameState.user.class,
-                    school: gameState.user.school,
-                    score: score,
-                    duration: 180 - gameState.timer,
+            // Save to Firebase
+            if (window.saveToFirestore) {
+                window.saveToFirestore({
+                    ...state.user,
+                    score,
+                    duration: 180 - state.timer,
                     submitTime: Date.now()
                 });
             }
-	}	
-        function useLifeline(type) {
-            if (!gameState.lifelines[type]) return;
-            gameState.lifelines[type] = false;
-            document.getElementById(`life-${type}`).style.display = 'none';
-            const hint = document.getElementById('lifeline-hint');
-            hint.classList.remove('hidden');
-            const q = gameState.questions[gameState.currentLevel];
-            if (type === '5050') {
-                const wr = q.shuffled.filter(x => x.i !== q.c).sort(() => 0.5 - Math.random()).slice(0, 2);
-                document.querySelectorAll('.btn-answer').forEach(b => { wr.forEach(w => { if(b.innerText.includes(w.t)) b.style.visibility = 'hidden'; })});
-                hint.innerText = "Hệ thống đã loại bỏ 2 phương án sai.";
-            } else if (type === 'audience') {
-                if (q.type === 'mcq') {
-                    let v = [10, 10, 10, 10]; const cIdx = q.shuffled.findIndex(x => x.i === q.c); v[cIdx] = 70;
-                    hint.innerText = `Khán giả chọn: A:${v[0]}% B:${v[1]}% C:${v[2]}% D:${v[3]}%`;
-                } else hint.innerHTML = `Gợi ý khán giả: <em>${q.hint}</em>`;
-            } else hint.innerHTML = `Người thân gợi ý: "Mình nghĩ kiến thức là: <strong>${q.hint}</strong>"`;
-            renderMath();
+
+            document.getElementById('screen-game').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen');
+            document.getElementById('result-title').innerText = win ? "TRIỆU PHÚ TRI THỨC" : "KẾT THÚC";
+            document.getElementById('result-body').innerHTML = `<p>${state.user.name} - SBD: ${state.user.sbd}</p><div class="text-3xl font-bold my-4">${score.toFixed(1)} ĐIỂM</div><div class="text-xl">Xếp loại: ${score >= 9 ? "XUẤT SẮC" : (score >= 8 ? "TỐT" : (score >= 5 ? "KHÁ" : "TRUNG BÌNH"))}</div>`;
+            if (score >= 5) startFireworks();
         }
 
-        function showRules() { playSound('pingpong'); document.getElementById('screen-login').classList.add('hidden-screen'); document.getElementById('screen-rules').classList.remove('hidden-screen'); }
-        function backToHome() { playSound('pingpong'); document.getElementById('screen-rules').classList.add('hidden-screen'); document.getElementById('screen-login').classList.remove('hidden-screen'); }
-        function showModal(t, b, btn, cb, level) { const card = document.getElementById('modal-card'); card.className = "milestone-card " + (level === 5 ? "level-5" : "level-10"); document.getElementById('modal-title').innerText = t; document.getElementById('modal-body').innerText = b; document.getElementById('modal-btn').innerText = btn; document.getElementById('global-modal').classList.remove('hidden'); window.modalCb = cb; renderMath(); }
-        function closeModal() { document.getElementById('global-modal').classList.add('hidden'); if(window.modalCb) window.modalCb(); }
-        function startTimer() { gameState.timerInterval = setInterval(() => { gameState.timer--; updateTimerUI(); if(gameState.timer <= 0) { clearInterval(gameState.timerInterval); end(false); } }, 1000); }
-        function updateTimerUI() { const t = document.getElementById('timer'); t.innerText = `${gameState.timer}s`; t.className = gameState.timer <= 10 ? "text-xl font-bold timer-warning" : "text-xl font-bold text-yellow-400"; }
-        function stopGameManual() { playSound('pingpong'); end(true, true); }
-        function restartGame() { location.reload(); }
-        function closeHistory() { document.getElementById('screen-history').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen'); }
-
+        function autoSubmitViolation() { if (state.isFinished || !state.isOfficial) return; state.isFinished = true; clearInterval(state.interval); playSound('wrong'); document.getElementById('screen-game').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen'); document.getElementById('result-title').innerText = "VI PHẠM"; document.getElementById('result-body').innerHTML = `<p class='text-red-500 font-bold'>Rời màn hình khi đang ngồi Ghế nóng. Tự động thu bài.</p>`; }
+        function autoSubmitTimeout() { alert("Hết giờ!"); finishGame(false); }
+        function confirmStop() { if (confirm("Dừng chơi để bảo toàn điểm?")) finishGame(true, true); }
+        
+        function showMilestone(lvl, msg, cb) { 
+            document.getElementById('m-title').innerText = `VƯỢT QUA MỐC CÂU ${lvl}!`; 
+            document.getElementById('m-body').innerText = msg; 
+            document.getElementById('modal-content').className = `milestone-card level-${lvl}`;
+            document.getElementById('modal-container').classList.remove('hidden'); 
+            window.mCb = cb; 
+            renderMath(); 
+        }
+        
+        document.getElementById('m-btn').onclick = () => { document.getElementById('modal-container').classList.add('hidden'); if(window.mCb) window.mCb(); };
+        
         function showHistory() {
-            const cont = document.getElementById('history-content'); cont.innerHTML = '';
-            gameState.history.forEach((h, i) => {
-                const d = document.createElement('div'); d.className = `p-6 rounded-2xl bg-gray-50 text-gray-900 shadow-sm border-l-8 ${h.isCorrect ? 'border-green-500' : 'border-red-500'}`;
-                let ansH = "";
+            const list = document.getElementById('history-list'); list.innerHTML = '';
+            state.history.forEach((h, i) => {
+                const item = document.createElement('div'); item.className = `p-5 rounded-xl border-l-8 ${h.isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`;
+                let ansMarkup = "";
                 if (h.type === 'mcq') {
-                    ansH = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                    ansMarkup = `<div class='grid grid-cols-1 md:grid-cols-2 gap-2 mt-3'>`;
                     h.details.shuffled.forEach((opt, idx) => {
-                        const isU = (idx === h.details.userIdx), isC = (opt.i === h.details.originalCorrect);
-                        let sC = "border p-3 rounded-xl flex justify-between ";
-                        if (isU) sC += h.isCorrect ? "bg-green-100 border-green-600 font-bold" : "bg-red-100 border-red-600 font-bold";
-                        else if (isC) sC += "bg-green-50 border-green-400 font-bold"; else sC += "bg-white border-gray-200 opacity-60";
-                        ansH += `<div class="${sC}"><span>${String.fromCharCode(65+idx)}. ${opt.t}</span> ${isU?(h.isCorrect?'✅':'❌'):(isC?'⭐':'')}</div>`;
+                        const isU = idx === h.details.userIdx; const isC = idx === h.details.correctIdx;
+                        let cls = "p-2 rounded border text-sm " + (isU ? (h.isCorrect ? "bg-green-200" : "bg-red-200") : (isC ? "bg-green-100" : "bg-white opacity-60"));
+                        ansMarkup += `<div class="${cls}">${String.fromCharCode(65+idx)}. ${opt.txt} ${isU?(h.isCorrect?'✅':'❌'):(isC?'⭐':'')}</div>`;
                     });
-                    ansH += `</div>`;
+                    ansMarkup += `</div>`;
                 } else if (h.type === 'tf') {
-                    ansH = `<div class="mt-4 space-y-2">`;
-                    h.details.items.forEach((item, idx) => {
-                        const isR = h.details.selections[idx] === item.c;
-                        ansH += `<div class="p-3 border rounded-xl flex justify-between ${isR?'bg-green-50':'bg-red-50'}"><span>${String.fromCharCode(97+idx)}) ${item.text}</span><span class="text-sm">Bạn: ${h.details.selections[idx]?'Đ':'S'} | ĐA: ${item.c?'Đ':'S'}</span></div>`;
-                    });
-                    ansH += `</div>`;
-                } else ansH = `<div class="mt-4 p-4 border rounded-xl bg-white"><p>Bạn nhập: <span class="${h.isCorrect?'text-green-700':'text-red-700'} font-bold underline">${h.userAns}</span></p><p class="text-sm text-gray-600">Đáp án: <strong>${h.correctAns}</strong></p></div>`;
-                
-                d.innerHTML = `<h4 class="text-xl font-bold mb-2">Câu ${i+1}: ${h.q}</h4>${ansH}<div class="mt-4 p-4 bg-blue-50 rounded-xl border-l-4 border-blue-500 text-sm italic"><strong>Phân tích:</strong> ${h.exp}</div>`;
-                cont.appendChild(d);
+                    ansMarkup = `<div class='mt-3 space-y-1'>`;
+                    h.details.items.forEach((it, idx) => ansMarkup += `<div class='text-[12px] p-2 border rounded ${h.details.userTF[idx]===it.c?'bg-green-100':'bg-red-100'}'>${String.fromCharCode(97+idx)}) ${it.text}<br><b>Bạn: ${h.details.userTF[idx]?'Đ':'S'} | ĐA: ${it.c?'Đ':'S'}</b></div>`);
+                    ansMarkup += `</div>`;
+                } else ansMarkup = `<div class='mt-3 p-3 bg-white border rounded'>Bạn: ${h.userAns} | ĐA: ${h.correctAns}</div>`;
+                item.innerHTML = `<h4 class="font-bold text-blue-900">Câu ${i+1}: ${h.question}</h4>${ansMarkup}<div class="mt-3 p-3 bg-blue-100/50 rounded text-sm italic"><strong>Giải thích:</strong> ${h.explanation}</div>`;
+                list.appendChild(item);
             });
             document.getElementById('screen-result').classList.add('hidden-screen'); document.getElementById('screen-history').classList.remove('hidden-screen'); renderMath();
+        }
+
+        function closeHistory() { document.getElementById('screen-history').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen'); }
+        function showRules() { playSound('click'); document.getElementById('screen-login').classList.add('hidden-screen'); document.getElementById('screen-rules').classList.remove('hidden-screen'); }
+        function backToHome() { 
+            playSound('click'); 
+            document.getElementById('screen-rules').classList.add('hidden-screen'); 
+            document.getElementById('screen-admin').classList.add('hidden-screen'); 
+            document.getElementById('game-header').classList.add('hidden-screen'); 
+            document.getElementById('points-ladder').classList.add('hidden-screen'); 
+            document.getElementById('screen-login').classList.remove('hidden-screen'); 
+        }
+
+        function renderMath() {
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                setTimeout(() => { MathJax.typesetPromise().catch(err => console.log('MathJax error:', err)); }, 100);
+            }
         }
 
         function startFireworks() {
             const canvas = document.getElementById('fireworks'); const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            let parts = [];
-            function animate() {
-                if (!gameState.isGameOver) return; ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (Math.random() < 0.05) {
-                    const x = Math.random() * canvas.width;
-                    const y = Math.random() * canvas.height * 0.5;
-                    for (let i = 0; i < 30; i++) {
-                        parts.push({ x: x, y: y, vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8, a: 1, c: `hsl(${Math.random()*360},100%,50%)` });
-                    }
-                }
-                parts.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.a -= 0.01; ctx.globalAlpha = p.a; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill(); });
-                requestAnimationFrame(animate);
+            let p = [];
+            function draw() {
+                if (!state.isFinished) return; ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (p.length < 100) p.push({ x: Math.random() * canvas.width, y: canvas.height, vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 10 - 5, size: Math.random() * 3 + 2, color: `hsl(${Math.random() * 360}, 100%, 50%)`, life: 1 });
+                p.forEach((it, i) => { it.x += it.vx; it.y += it.vy; it.vy += 0.1; it.life -= 0.01; ctx.globalAlpha = it.life; ctx.fillStyle = it.color; ctx.beginPath(); ctx.arc(it.x, it.y, it.size, 0, Math.PI * 2); ctx.fill(); if (it.life <= 0) p.splice(i, 1); });
+                requestAnimationFrame(draw);
             }
-            animate();
+            draw();
         }
+
+        // --- ADMIN FUNCTIONS ---
+        function promptAdmin() {
+            const pass = prompt("Nhập mật khẩu quản trị:");
+            if (pass === "123456") {
+                showAdmin();
+            } else if (pass !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+
+        async function showAdmin() {
+            document.getElementById('screen-login').classList.add('hidden-screen');
+            document.getElementById('screen-admin').classList.remove('hidden-screen');
+            if (window.fetchAdminData) {
+                adminData = await window.fetchAdminData();
+                renderAdminTable();
+            }
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '';
+            
+            // Calculate Rank (Score desc, then duration asc)
+            const sortedByRank = [...adminData].sort((a, b) => b.score - a.score || a.duration - b.duration);
+            
+            adminData.forEach((item, index) => {
+                const rank = sortedByRank.findIndex(x => x === item) + 1;
+                const date = new Date(item.submitTime).toLocaleString('vi-VN');
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="font-bold text-blue-700">${rank}</td>
+                        <td>${item.sbd}</td>
+                        <td class="text-left font-medium">${item.name}</td>
+                        <td>${item.class}</td>
+                        <td>${item.school}</td>
+                        <td class="font-bold text-red-600">${item.score.toFixed(1)}</td>
+                        <td>${item.duration}</td>
+                        <td class="text-[11px]">${date}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function sortAdminData(criteria) {
+            if (criteria === 'rank') {
+                adminData.sort((a, b) => b.score - a.score || a.duration - b.duration);
+            } else if (criteria === 'score') {
+                adminData.sort((a, b) => b.score - a.score);
+            } else if (criteria === 'sbd') {
+                adminData.sort((a, b) => a.sbd.localeCompare(b.sbd));
+            } else if (criteria === 'duration') {
+                adminData.sort((a, b) => a.duration - b.duration);
+            } else if (criteria === 'class') {
+                adminData.sort((a, b) => a.class.localeCompare(b.class));
+            } else if (criteria === 'school') {
+                adminData.sort((a, b) => a.school.localeCompare(b.school));
+            } else if (criteria === 'submitTime') {
+                adminData.sort((a, b) => b.submitTime - a.submitTime);
+            }
+            renderAdminTable();
+        }
+
+        function exportAdminToExcel() {
+            if (adminData.length === 0) return alert("Không có dữ liệu để xuất!");
+            
+            // Re-calculate rank for export
+            const sortedByRank = [...adminData].sort((a, b) => b.score - a.score || a.duration - b.duration);
+            const exportItems = adminData.map((item, idx) => ({
+                "STT": idx + 1,
+                "Hạng": sortedByRank.findIndex(x => x === item) + 1,
+                "Số báo danh": item.sbd,
+                "Họ và tên": item.name,
+                "Lớp": item.class,
+                "Trường": item.school,
+                "Điểm": item.score,
+                "Thời lượng (giây)": item.duration,
+                "Thời gian nộp": new Date(item.submitTime).toLocaleString('vi-VN')
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportItems);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Ket Qua");
+            XLSX.writeFile(wb, "KetQua_VatLi11.xlsx");
+        }
+
         window.onload = init;
     </script>
 
+    <!-- FIREBASE MODULE -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
@@ -611,57 +767,42 @@ function end(win, manual = false) {
             projectId: "game-vat-ly-9-924bc",
             storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
             messagingSenderId: "772223015613",
-            appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
+            appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4",
+            measurementId: "G-16MQPKXQXY"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = 'altp-v11-tu-dien';
 
-        window.saveResult = async (data) => {
+        // Auth before operation
+        const ensureAuth = async () => {
+            if (!auth.currentUser) await signInAnonymously(auth);
+            return auth.currentUser;
+        };
+
+        window.saveToFirestore = async (data) => {
             try {
-                console.log("🚀 Đang truyền dữ liệu lên Firebase...");
-                const docRef = await addDoc(collection(db, "results"), data);
-                console.log("✅ Đã lưu thành công! ID:", docRef.id);
-            } catch (e) {
-                console.error("❌ Lỗi Firebase:", e);
-                alert("Lỗi lưu kết quả: " + e.message);
+                const user = await ensureAuth();
+                if (!user) return;
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'results');
+                await addDoc(path, data);
+            } catch (e) { console.error("Firestore Save Error:", e); }
+        };
+
+        window.fetchAdminData = async () => {
+            try {
+                const user = await ensureAuth();
+                if (!user) return [];
+                const path = collection(db, 'artifacts', appId, 'public', 'data', 'results');
+                const snapshot = await getDocs(query(path));
+                return snapshot.docs.map(doc => doc.data());
+            } catch (e) { 
+                console.error("Firestore Fetch Error:", e); 
+                return [];
             }
         };
     </script>
-
-    <script>
-        function goAdmin() {
-            const overlay = document.createElement('div');
-            overlay.style = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
-            overlay.innerHTML = `
-                <div style="background:white; padding:30px; border-radius:15px; text-align:center; color:black; box-shadow:0 0 20px rgba(0,0,0,0.5); width:300px;">
-                    <h3 style="margin-top:0; color:#1a2a6c; font-size:20px;">Xác thực Admin</h3>
-                    <p style="font-size:14px; color:#666; margin-bottom:15px;">Vui lòng nhập mật khẩu quản trị</p>
-                    <input type="password" id="admin-pass" placeholder="Mật khẩu..." style="padding:12px; border:2px solid #ddd; border-radius:8px; margin-bottom:20px; width:100%; box-sizing:border-box; outline:none; text-align:center; font-size:18px;">
-                    <div style="display:flex; gap:10px;">
-                        <button id="confirm-btn" style="flex:1; background:#2ecc71; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">XÁC NHẬN</button>
-                        <button id="cancel-btn" style="flex:1; background:#e74c3c; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">HỦY</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            const input = document.getElementById('admin-pass');
-            input.focus();
-            input.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('confirm-btn').click(); };
-            document.getElementById('confirm-btn').onclick = () => {
-                if (input.value === "1234@@") {
-                    window.location.href = "admin.html";
-                } else {
-                    alert("Sai mật khẩu!");
-                    document.body.removeChild(overlay);
-                }
-            };
-            document.getElementById('cancel-btn').onclick = () => document.body.removeChild(overlay);
-        }
-    </script>
-
-    <a href="javascript:void(0)" onclick="goAdmin()" style="position:fixed; bottom:10px; right:10px; background:rgba(0,0,0,0.5); color:white; padding:8px 15px; border-radius:5px; text-decoration:none; z-index:9999; font-size:12px; border:1px solid rgba(255,255,255,0.2);">
-        Admin
-    </a>
 </body>
 </html>
