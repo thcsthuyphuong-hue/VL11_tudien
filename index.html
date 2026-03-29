@@ -499,7 +499,7 @@
 
         function next() { gameState.currentLevel++; gameState.selectedIdx = undefined; loadQuestion(); }
 
-       function end(win, manual = false) {
+     async function end(win, manual = false) {
             gameState.isGameOver = true; 
             clearInterval(gameState.timerInterval);
             let score = manual ? pointsConfig[gameState.currentLevel - 1] : (win ? 10 : (gameState.currentLevel < 5 ? 0 : (gameState.currentLevel < 10 ? 5 : 7)));
