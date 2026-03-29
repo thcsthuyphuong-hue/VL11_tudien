@@ -138,6 +138,17 @@
         .admin-status { font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 10px; }
         .status-connected { background: #dcfce7; color: #166534; }
         .status-error { background: #fee2e2; color: #991b1b; }
+
+        /* Custom Lifeline Hint Box */
+        .lifeline-bubble {
+            background: #fffbe6;
+            color: #856404;
+            border: 2px solid #ffe58f;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -154,7 +165,7 @@
             <div class="flex items-center gap-4">
                 <div id="timer" class="text-2xl font-bold text-yellow-400 border-2 border-yellow-400 px-3 py-1 rounded-full">180s</div>
                 <div class="flex gap-1">
-                    <button onclick="useLifeline('5050')" id="life-5050" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">50:50</button>
+                    <button onclick="useLifeline('5050')" id="life-5050" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">Trợ giúp 1</button>
                     <button onclick="useLifeline('audience')" id="life-audience" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">Khán giả</button>
                     <button onclick="useLifeline('phone')" id="life-phone" class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold hover:bg-blue-500 uppercase">Gọi điện</button>
                 </div>
@@ -166,7 +177,7 @@
                 
                 <!-- Screen 1: Login -->
                 <div id="screen-login" class="bg-black/30 backdrop-blur-md p-6 rounded-2xl border border-white/20 text-center m-auto max-w-lg w-full relative">
-                    <button onclick="promptAdmin()" class="absolute top-4 right-4 text-[10px] bg-white/20 px-2 py-1 rounded hover:bg-white/40 uppercase font-bold">Admin</button>
+                    <button onclick="showAdminLogin()" class="absolute top-4 right-4 text-[10px] bg-white/20 px-2 py-1 rounded hover:bg-white/40 uppercase font-bold">Admin</button>
                     <h1 class="text-3xl font-bold mb-2 text-yellow-400 uppercase tracking-tighter">Ai là triệu phú</h1>
                     <p class="mb-6 text-sm italic text-blue-200">Chủ đề: Tụ điện - Vật lí 11</p>
                     <div class="space-y-3 mb-6">
@@ -207,7 +218,7 @@
                 <div id="screen-game" class="hidden-screen mt-2 px-2">
                     <div id="question-container" class="bg-black/40 p-5 rounded-xl border border-blue-500/30 mb-4">
                         <div id="question-text" class="text-xl font-bold mb-6 leading-tight"></div>
-                        <div id="hint-box" class="hidden mb-4 p-3 bg-yellow-100 text-black rounded-lg border-l-4 border-yellow-600 text-sm italic"></div>
+                        <div id="hint-box" class="hidden mb-4 lifeline-bubble text-sm italic"></div>
                         <div id="mcq-area" class="grid grid-cols-1 gap-2"></div>
                         <div id="tf-area" class="hidden space-y-3"></div>
                         <div id="short-area" class="hidden">
@@ -288,12 +299,25 @@
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL CHÚC MỪNG -->
     <div id="modal-container" class="modal-overlay hidden">
         <div id="modal-content" class="milestone-card">
             <h3 id="m-title" class="font-bold uppercase"></h3>
             <p id="m-body" class="italic"></p>
             <button id="m-btn" class="bg-blue-600 text-white px-12 py-4 rounded-full font-bold uppercase hover:bg-blue-700 shadow-lg text-lg">TIẾP TỤC</button>
+        </div>
+    </div>
+
+    <!-- MODAL ĐĂNG NHẬP ADMIN -->
+    <div id="admin-login-modal" class="modal-overlay hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center text-black border-4 border-blue-900">
+            <h3 class="text-xl font-bold text-blue-900 mb-6 uppercase">Xác thực Quản trị</h3>
+            <p class="text-sm mb-4">Vui lòng nhập mật khẩu để truy cập hệ thống dữ liệu</p>
+            <input type="password" id="admin-password-input" class="w-full p-4 border-2 border-gray-300 rounded-lg mb-6 text-center text-2xl tracking-widest outline-none focus:border-blue-600" placeholder="******">
+            <div class="flex gap-2">
+                <button onclick="closeAdminLogin()" class="flex-1 bg-gray-400 text-white py-3 rounded-lg font-bold">HỦY</button>
+                <button onclick="processAdminLogin()" class="flex-1 bg-blue-900 text-white py-3 rounded-lg font-bold uppercase">ĐĂNG NHẬP</button>
+            </div>
         </div>
     </div>
 
@@ -326,7 +350,7 @@
                 { q: "Đơn vị Nanofara (nF) bằng", a: ["$10^{-9}\\ F$.", "$10^{-6}\\ F$.", "$10^{-12}\\ F$.", "$10^{-3}\\ F$."], c: 0, exp: "Nano tương ứng $10^{-9}$.", hint: "Một phần tỉ." },
                 { q: "Khi rút tụ điện khỏi nguồn rồi tăng khoảng cách hai bản, đại lượng nào KHÔNG đổi?", a: ["Điện tích $Q$.", "Hiệu điện thế $U$.", "Điện dung $C$.", "Cường độ $E$."], c: 0, exp: "Khi ngắt nguồn, điện tích bị cô lập nên không thay đổi.", hint: "Điện tích không có chỗ thoát." },
                 { q: "Nếu nối tụ điện vào nguồn DC, sau khi tích đầy, dòng điện qua tụ là", a: ["bằng 0.", "rất lớn.", "không đổi.", "xoay chiều."], c: 0, exp: "Tụ ngăn dòng điện một chiều sau khi đã tích đầy.", hint: "Tụ cách điện hoàn toàn với DC." },
-                { q: "Đồ thị biểu diễn mối liên hệ giữa $Q$ và $U$ của một tụ điện là", a: ["đường thẳng qua gốc tọa độ.", "đường parabol.", "đường hyperbol.", "đường tròn."], c: 0, exp: "Vì $Q = CU$ ($C$ hằng số) nên $Q$ tỉ lệ thuận với $U$.", hint: "Hàm bậc nhất $y = ax$." },
+                { q: "Đồ thị biểu diễn mối liên hệ giữa $Q$ and $U$ của một tụ điện là", a: ["đường thẳng qua gốc tọa độ.", "đường parabol.", "đường hyperbol.", "đường tròn."], c: 0, exp: "Vì $Q = CU$ ($C$ hằng số) nên $Q$ tỉ lệ thuận với $U$.", hint: "Hàm bậc nhất $y = ax$." },
                 { q: "Công suất phóng điện của tụ điện phụ thuộc vào", a: ["thời gian phóng điện.", "khối lượng bản tụ.", "màu sắc vỏ tụ.", "độ cao đặt tụ."], c: 0, exp: "$P = W/t$, thời gian $t$ càng nhỏ công suất càng lớn.", hint: "Liên quan đến tốc độ giải phóng năng lượng." },
                 { q: "Tụ hóa là loại tụ điện", a: ["có phân cực âm dương.", "không có điện môi.", "không tích được điện.", "chỉ dùng cho điện cao áp."], c: 0, exp: "Tụ hóa có cực tính, phải mắc đúng chiều nguồn điện.", hint: "Phải để ý cực tính khi lắp." },
                 { q: "Để tăng điện dung của tụ điện phẳng, ta có thể", a: ["giảm khoảng cách $d$.", "giảm diện tích $S$.", "giảm hằng số điện môi.", "tăng hiệu điện thế $U$."], c: 0, exp: "$C$ tỉ lệ nghịch với $d$ nên giảm $d$ sẽ tăng $C$.", hint: "Đưa hai bản lại gần nhau hơn." }
@@ -340,7 +364,7 @@
                         { text: "Nếu tăng khoảng cách $d$ giữa hai bản thì năng lượng tụ giảm.", c: true, exp: "Đúng, $d$ tăng $\Rightarrow C$ giảm $\Rightarrow W = \\frac{1}{2} CU^2$ giảm." },
                         { text: "Điện dung của tụ điện tỉ lệ nghịch với hiệu điện thế $U$ của nguồn.", c: false, exp: "Sai, $C$ là hằng số cấu tạo, không phụ thuộc $U$." }
                     ],
-                    hint: "Nhớ công thức cấu tạo tụ phẳng và công thức $Q=CU$."
+                    hint: "<strong>Chuyên gia tư vấn:</strong><br>a) ĐÚNG (diện tích S tỉ lệ thuận với C).<br>b) SAI (khi điện môi tăng thì C tăng, dẫn đến điện tích Q tăng).<br>c) ĐÚNG (khoảng cách tăng làm C giảm, từ đó năng lượng giảm theo).<br>d) SAI (điện dung là đặc tính cấu tạo của tụ)."
                 },
                 {
                     lead: "Xét các phát biểu về tụ điện và các ứng dụng thực tế.",
@@ -350,7 +374,7 @@
                         { text: "Khi ghép nối tiếp nhiều tụ, điện dung của bộ luôn nhỏ hơn điện dung của từng tụ thành phần.", c: true, exp: "Đúng, theo quy tắc nghịch đảo $1/C_b = \\sum 1/C_i$." },
                         { text: "Năng lượng của tụ điện đo bằng đơn vị Vôn (V).", c: false, exp: "Sai, năng lượng đo bằng Jun (J)." }
                     ],
-                    hint: "Rà soát tính chất vật lí cơ bản của tụ."
+                    hint: "<strong>Khán giả nhận định:</strong><br>a) SAI (điện môi cách điện hoàn toàn).<br>b) ĐÚNG (đây là công dụng chính trong máy ảnh).<br>c) ĐÚNG (công thức nghịch đảo làm C bộ luôn bé nhất).<br>d) SAI (Vôn là đơn vị hiệu điện thế)."
                 },
                 {
                     lead: "Một học sinh thực hành đo điện dung của một tụ điện hóa.",
@@ -360,7 +384,7 @@
                         { text: "Điện dung của tụ hóa thay đổi theo thời gian nạp điện.", c: false, exp: "Sai, điện dung là thông số cố định của cấu tạo." },
                         { text: "Nếu mắc ngược cực, tụ có thể bị hỏng hoặc nổ.", c: true, exp: "Đúng, hiện tượng này rất phổ biến với tụ hóa." }
                     ],
-                    hint: "Lưu ý về cách sử dụng tụ hóa thực tế."
+                    hint: "<strong>Ý kiến tư vấn:</strong><br>a) ĐÚNG (tụ hóa rất nhạy với cực tính).<br>b) ĐÚNG (C=Q/U).<br>c) SAI (C không đổi theo thời gian nạp).<br>d) ĐÚNG (rất nguy hiểm nếu mắc ngược cực)."
                 },
                 {
                     lead: "Về hằng số điện môi $\\varepsilon$ của các môi trường.",
@@ -370,7 +394,7 @@
                         { text: "$\\varepsilon$ của kim loại dẫn điện là vô cùng lớn.", c: false, exp: "Sai, hằng số điện môi chỉ định nghĩa cho chất cách điện." },
                         { text: "Khi thay không khí bằng dầu hỏa ($\\varepsilon=2$), điện dung tụ phẳng tăng 2 lần.", c: true, exp: "Đúng, $C$ tỉ lệ thuận với $\\varepsilon$." }
                     ],
-                    hint: "Đặc điểm của điện môi."
+                    hint: "<strong>Gợi ý từ người thân:</strong><br>a) ĐÚNG (thường dùng trong bài tập).<br>b) ĐÚNG (mọi vật chất đều cản trở điện trường tốt hơn chân không).<br>c) SAI (không định nghĩa cho vật dẫn).<br>d) ĐÚNG (C tăng tỉ lệ thuận với điện môi)."
                 },
                 {
                     lead: "Xét tụ điện phẳng được ngắt ra khỏi nguồn điện sau khi tích điện.",
@@ -380,7 +404,7 @@
                         { text: "Cường độ điện trường giữa hai bản tụ tăng khi $d$ tăng.", c: false, exp: "Sai, $E = U/d = Q/(Cd)$ không đổi khi ngắt nguồn." },
                         { text: "Năng lượng của tụ điện không đổi.", c: false, exp: "Sai, ngoại lực làm công nên năng lượng $W = Q^2/(2C)$ tăng." }
                     ],
-                    hint: "Phân tích trạng thái cô lập (ngắt nguồn)."
+                    hint: "<strong>Chuyên gia phân tích:</strong><br>a) ĐÚNG (ngắt nguồn làm Q không đổi).<br>b) ĐÚNG (C giảm nên U=Q/C phải tăng).<br>c) SAI (E không phụ thuộc vào d khi tụ cô lập).<br>d) SAI (năng lượng sẽ tăng do ta tốn công tách 2 bản)."
                 },
                 {
                     lead: "Sử dụng tụ điện trong mạch điện tử gia dụng.",
@@ -390,7 +414,7 @@
                         { text: "Có thể thay thế tụ $1000\\ V$ bằng tụ $16\\ V$ trong mọi trường hợp.", c: false, exp: "Sai, tụ $16\\ V$ sẽ bị nổ nếu dùng ở điện áp cao hơn giới hạn." },
                         { text: "Tụ điện lưu trữ điện tích vô hạn.", c: false, exp: "Sai, mỗi tụ có điện tích giới hạn $Q = CU_{max}$." }
                     ],
-                    hint: "Ứng dụng thực tế của tụ điện."
+                    hint: "<strong>Ý kiến chuyên gia:</strong><br>a) ĐÚNG.<br>b) ĐÚNG.<br>c) SAI (điện áp đánh thủng rất quan trọng).<br>d) SAI (có giới hạn định mức)."
                 },
                 {
                     lead: "Về năng lượng điện trường trong tụ điện.",
@@ -400,7 +424,7 @@
                         { text: "Khi tụ phóng điện, năng lượng điện trường chuyển hóa thành các dạng khác.", c: true, exp: "Đúng, thường là nhiệt năng hoặc quang năng." },
                         { text: "Đơn vị năng lượng điện trường là Jun (J).", c: true, exp: "Đúng, đơn vị chuẩn SI cho năng lượng." }
                     ],
-                    hint: "Công thức tính công và năng lượng."
+                    hint: "<strong>Gợi ý từ khán giả:</strong><br>a) ĐÚNG.<br>b) SAI (tỉ lệ với U bình phương).<br>c) ĐÚNG.<br>d) ĐÚNG."
                 },
                 {
                     lead: "Các loại tụ điện phổ biến.",
@@ -410,18 +434,18 @@
                         { text: "Tụ hóa bắt buộc phải mắc đúng cực.", c: true, exp: "Đúng, do cấu tạo hóa học đặc thù." },
                         { text: "Tụ xoay thay đổi điện dung bằng cách thay đổi khoảng cách $d$.", c: false, exp: "Sai, thay đổi diện tích đối diện $S$." }
                     ],
-                    hint: "Nhận biết các loại linh kiện tụ điện."
+                    hint: "<strong>Chuyên gia tư vấn:</strong><br>a) ĐÚNG.<br>b) SAI (tụ gốm C rất nhỏ).<br>c) ĐÚNG.<br>d) SAI (thay đổi diện tích S đối diện)."
                 }
             ],
             short: [
-                { q: "Một tụ điện có điện dung $20\\ \\mu F$ được tích điện đến hiệu điện thế $100\\ V$. Tính điện tích $Q$ của tụ (đơn vị mC, làm tròn 1 chữ số)?", a: "2", exp: "$Q = CU = 20 \\cdot 10^{-6} \\cdot 100 = 2 \\cdot 10^{-3}\\ C = 2\\ mC$.", hint: "$Q = C$ nhân $U$, lưu ý đổi đơn vị." },
-                { q: "Tính năng lượng tích trữ (đơn vị mJ) của tụ điện $C = 10\\ \\mu F$ khi hiệu điện thế là $20\\ V$?", a: "2", exp: "$W = \\frac{1}{2} CU^2 = 0,5 \\cdot 10 \\cdot 10^{-6} \\cdot 400 = 2 \\cdot 10^{-3}\\ J = 2\\ mJ$.", hint: "Sử dụng công thức $\\frac{1}{2} CU^2$." },
-                { q: "Một tụ điện phẳng có diện tích bản $S = 1\\ m^2$, khoảng cách $d = 1\\ mm$, điện môi không khí. Tính điện dung $C$ của nó theo đơn vị nF (lấy $\\varepsilon_0 = 8,85 \\cdot 10^{-12}\\ F/m$, làm tròn số nguyên)?", a: "9", exp: "$C = \\varepsilon_0 S / d = 8,85 \\cdot 10^{-12} \\cdot 1 / 0,001 \\approx 8,85 \\cdot 10^{-9}\\ F \\approx 9\\ nF$.", hint: "Công thức $C = \\varepsilon_0 S / d$." },
-                { q: "Xét các nhận định:\n1. 'Đơn vị $C$ là Fara'.\n2. '$Q$ tỉ lệ thuận $U$'.\n3. 'Tụ ngăn dòng AC'.\n4. '$W = \\frac{1}{2} CU$'.\n5. '$C$ không phụ thuộc $Q$'.\n6. 'Ghép song song làm tăng $C$'.\nChọn các nhận định ĐÚNG rồi ghi đáp án dãy số tăng dần.", a: "1256", exp: "Đúng: 1, 2, 5, 6. Sai: 3 (ngăn DC), 4 (thiếu bình phương $U$).", hint: "Kiểm tra kỹ từng định nghĩa." },
-                { q: "Cho bộ tụ gồm hai tụ $C_1 = 3\\ \\mu F$ và $C_2 = 6\\ \\mu F$ ghép nối tiếp. Tính điện dung của bộ tụ (đơn vị $\\mu F$)?", a: "2", exp: "$1/C_b = 1/3 + 1/6 = 1/2 \\Rightarrow C_b = 2\\ \\mu F$.", hint: "Nối tiếp dùng công thức nghịch đảo." },
-                { q: "Một tụ điện $5\\ \\mu F$ tích được điện tích $Q = 0,5\\ mC$. Hiệu điện thế giữa hai bản tụ là bao nhiêu Vôn (V)?", a: "100", exp: "$U = Q/C = 0,5 \\cdot 10^{-3} / (5 \\cdot 10^{-6}) = 100\\ V$.", hint: "Biến đổi từ $Q = CU$." },
-                { q: "Khi năng lượng của tụ tăng lên 4 lần thì hiệu điện thế giữa hai bản tụ đã tăng lên mấy lần?", a: "2", exp: "Vì $W$ tỉ lệ với $U^2$ nên $W$ tăng 4 thì $U$ tăng $\\sqrt{4} = 2$.", hint: "Mối liên hệ năng lượng và hiệu điện thế." },
-                { q: "Tính tổng điện năng (đơn vị mJ) của hai tụ $C_1 = 2\\ \\mu F, C_2 = 4\\ \\mu F$ khi ghép song song và nối vào nguồn $10\\ V$?", a: "0,3", exp: "$C_b = 6\\ \\mu F$. $W = 0,5 \\cdot 6 \\cdot 10^{-6} \\cdot 100 = 0,3\\ mJ$.", hint: "Tính $C_b$ song song trước." }
+                { q: "Một tụ điện có điện dung $20\\ \\mu F$ được tích điện đến hiệu điện thế $100\\ V$. Tính điện tích $Q$ của tụ (đơn vị mC, làm tròn 1 chữ số)?", a: "2", exp: "$Q = CU = 20 \\cdot 10^{-6} \\cdot 100 = 2 \\cdot 10^{-3}\\ C = 2\\ mC$.", hint: "<strong>Hướng dẫn tính:</strong><br>1. Sử dụng công thức $Q = C \cdot U$.<br>2. Thay $C = 20 \cdot 10^{-6}\ F$ và $U = 100\ V$.<br>3. Tính toán ra $0,002\ C$, đổi sang $mC$ ta được 2." },
+                { q: "Tính năng lượng tích trữ (đơn vị mJ) của tụ điện $C = 10\\ \\mu F$ khi hiệu điện thế là $20\\ V$?", a: "2", exp: "$W = \\frac{1}{2} CU^2 = 0,5 \\cdot 10 \\cdot 10^{-6} \\cdot 400 = 2 \\cdot 10^{-3}\\ J = 2\\ mJ$.", hint: "<strong>Hướng dẫn tính:</strong><br>1. Công thức năng lượng là $W = \frac{1}{2} CU^2$.<br>2. Lưu ý bình phương hiệu điện thế ($20^2 = 400$).<br>3. Đổi đơn vị từ Jun sang mJ (nhân $1000$)." },
+                { q: "Một tụ điện phẳng có diện tích bản $S = 1\\ m^2$, khoảng cách $d = 1\\ mm$, điện môi không khí. Tính điện dung $C$ của nó theo đơn vị nF (lấy $\varepsilon_0 = 8,85 \\cdot 10^{-12}\\ F/m$, làm tròn số nguyên)?", a: "9", exp: "$C = \varepsilon_0 S / d = 8,85 \\cdot 10^{-12} \cdot 1 / 0,001 \approx 8,85 \\cdot 10^{-9}\\ F \approx 9\\ nF$.", hint: "<strong>Công thức liên quan:</strong><br>$C = \varepsilon_0 \cdot \frac{S}{d}$. Với $d = 0,001\ m$. Kết quả tính ra cỡ $8,85\ nF$, làm tròn là 9." },
+                { q: "Xét các nhận định:\n1. 'Đơn vị $C$ là Fara'.\n2. '$Q$ tỉ lệ thuận $U$'.\n3. 'Tụ ngăn dòng AC'.\n4. '$W = \\frac{1}{2} CU$'.\n5. '$C$ không phụ thuộc $Q$'.\n6. 'Ghép song song làm tăng $C$'.\nChọn các nhận định ĐÚNG rồi ghi đáp án dãy số tăng dần.", a: "1256", exp: "Đúng: 1, 2, 5, 6. Sai: 3 (ngăn DC), 4 (thiếu bình phương $U$).", hint: "<strong>Phân tích nhận định:</strong><br>Hãy kiểm tra kỹ đơn vị (1) và công thức định nghĩa (2). Nhớ lại tụ ngăn dòng DC (3 sai). Năng lượng cần có $U$ bình phương (4 sai). (5) và (6) là tính chất cơ bản." },
+                { q: "Cho bộ tụ gồm hai tụ $C_1 = 3\\ \\mu F$ và $C_2 = 6\\ \\mu F$ ghép nối tiếp. Tính điện dung của bộ tụ (đơn vị $\\mu F$)?", a: "2", exp: "$1/C_b = 1/3 + 1/6 = 1/2 \\Rightarrow C_b = 2\\ \\mu F$.", hint: "<strong>Hướng dẫn:</strong><br>Sử dụng công thức ghép nối tiếp: $\frac{1}{C_b} = \frac{1}{C_1} + \frac{1}{C_2}$.<br>Tính tổng nghịch đảo rồi nghịch đảo lại kết quả." },
+                { q: "Một tụ điện $5\\ \\mu F$ tích được điện tích $Q = 0,5\\ mC$. Hiệu điện thế giữa hai bản tụ là bao nhiêu Vôn (V)?", a: "100", exp: "$U = Q/C = 0,5 \\cdot 10^{-3} / (5 \\cdot 10^{-6}) = 100\\ V$.", hint: "<strong>Công thức:</strong><br>Từ $Q = CU$, ta suy ra $U = \frac{Q}{C}$.<br>Đổi $0,5\ mC = 5 \cdot 10^{-4}\ C$." },
+                { q: "Khi năng lượng của tụ tăng lên 4 lần thì hiệu điện thế giữa hai bản tụ đã tăng lên mấy lần?", a: "2", exp: "Vì $W$ tỉ lệ với $U^2$ nên $W$ tăng 4 thì $U$ tăng $\sqrt{4} = 2$.", hint: "<strong>Gợi ý:</strong><br>$W$ tỉ lệ với bình phương của $U$. Nếu $W$ mới = $4 \cdot W$ cũ, hãy lấy căn bậc hai của 4 để tìm độ tăng của U." },
+                { q: "Tính tổng điện năng (đơn vị mJ) của hai tụ $C_1 = 2\\ \\mu F, C_2 = 4\\ \\mu F$ khi ghép song song và nối vào nguồn $10\\ V$?", a: "0,3", exp: "$C_b = 6\\ \\mu F$. $W = 0,5 \\cdot 6 \\cdot 10^{-6} \\cdot 100 = 0,3\\ mJ$.", hint: "<strong>Các bước tính:</strong><br>1. Tính $C$ bộ song song = $C_1 + C_2 = 6\ \mu F$.<br>2. Tính năng lượng $W = \frac{1}{2} C_b \cdot U^2$.<br>3. Kết quả là $0,0003\ J$, đổi ra $mJ$." }
             ]
         };
 
@@ -475,10 +499,12 @@
             localStorage.setItem('altp_user_v11', JSON.stringify(state.user));
             state.isOfficial = (mode === 'official');
             state.currentIdx = 0; state.isFinished = false; state.history = []; state.lifelines = { '5050': true, 'audience': true, 'phone': true };
+            
             const mcqs = [...DB.mcq].sort(() => 0.5 - Math.random()).slice(0, 12).map(v => ({...v, type:'mcq'}));
             const tfs = [...DB.tf].sort(() => 0.5 - Math.random()).slice(0, 4).map(v => ({...v, type:'tf'}));
             const shorts = [...DB.short].sort(() => 0.5 - Math.random()).slice(0, 4).map(v => ({...v, type:'short'}));
             state.questions = [...mcqs, ...tfs, ...shorts];
+            
             document.getElementById('screen-login').classList.add('hidden-screen');
             document.getElementById('game-header').classList.remove('hidden-screen');
             document.getElementById('points-ladder').classList.remove('hidden-screen');
@@ -512,16 +538,20 @@
                     mcqArea.appendChild(btn);
                 });
                 state.selectedMCQ = null;
-            } else if (q.type === 'tf') {
-                tfArea.classList.remove('hidden'); state.tempTF = [null, null, null, null];
-                q.items.forEach((item, idx) => {
-                    const row = document.createElement('div'); row.className = "flex justify-between items-center p-2 bg-white/10 rounded border border-white/10";
-                    row.innerHTML = `<div class="text-[14px] flex-grow pr-4">${String.fromCharCode(97+idx)}) ${item.text}</div><div class="flex gap-2"><button id="tf-t-${idx}" onclick="selectTF(${idx}, true)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Đúng</button><button id="tf-f-${idx}" onclick="selectTF(${idx}, false)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Sai</button></div>`;
-                    tfArea.appendChild(row);
-                });
-            } else { shortArea.classList.remove('hidden'); document.getElementById('short-input').value = ''; document.getElementById('short-input').focus(); }
+                document.getElementById('life-5050').innerText = "50:50";
+            } else {
+                document.getElementById('life-5050').innerText = "Chuyên gia";
+                if (q.type === 'tf') {
+                    tfArea.classList.remove('hidden'); state.tempTF = [null, null, null, null];
+                    q.items.forEach((item, idx) => {
+                        const row = document.createElement('div'); row.className = "flex justify-between items-center p-2 bg-white/10 rounded border border-white/10";
+                        row.innerHTML = `<div class="text-[14px] flex-grow pr-4">${String.fromCharCode(97+idx)}) ${item.text}</div><div class="flex gap-2"><button id="tf-t-${idx}" onclick="selectTF(${idx}, true)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Đúng</button><button id="tf-f-${idx}" onclick="selectTF(${idx}, false)" class="w-12 py-1 rounded bg-gray-500 text-[10px] font-bold uppercase">Sai</button></div>`;
+                        tfArea.appendChild(row);
+                    });
+                } else { shortArea.classList.remove('hidden'); document.getElementById('short-input').value = ''; document.getElementById('short-input').focus(); }
+            }
             
-            document.getElementById('life-5050').style.display = (q.type === 'mcq' && state.lifelines['5050']) ? 'block' : 'none';
+            document.getElementById('life-5050').style.display = state.lifelines['5050'] ? 'block' : 'none';
             document.getElementById('life-audience').style.display = state.lifelines['audience'] ? 'block' : 'none';
             document.getElementById('life-phone').style.display = state.lifelines['phone'] ? 'block' : 'none';
             document.getElementById('btn-stop').classList.toggle('hidden', state.currentIdx < 5);
@@ -543,14 +573,23 @@
         function useLifeline(type) {
             if (!state.lifelines[type]) return; playSound('click'); state.lifelines[type] = false; document.getElementById(`life-${type}`).style.display = 'none';
             const q = state.questions[state.currentIdx]; const box = document.getElementById('hint-box'); box.classList.remove('hidden');
+            
             if (type === '5050') {
-                const btns = document.querySelectorAll('.btn-answer');
-                const wrong = q.shuffled.map((o, i) => i).filter(i => q.shuffled[i].i !== q.c).sort(() => 0.5 - Math.random()).slice(0, 2);
-                wrong.forEach(idx => btns[idx].style.visibility = 'hidden'); box.innerText = "Đã loại bỏ 2 phương án sai.";
+                if (q.type === 'mcq') {
+                    const btns = document.querySelectorAll('.btn-answer');
+                    const wrong = q.shuffled.map((o, i) => i).filter(i => q.shuffled[i].i !== q.c).sort(() => 0.5 - Math.random()).slice(0, 2);
+                    wrong.forEach(idx => btns[idx].style.visibility = 'hidden'); box.innerText = "Hệ thống đã loại bỏ 2 phương án sai.";
+                } else {
+                    box.innerHTML = `<strong>Tư vấn từ Chuyên gia:</strong><br>${q.hint}`;
+                }
             } else if (type === 'audience') {
-                if (q.type === 'mcq') { let v = [10, 10, 10, 10]; v[q.shuffled.findIndex(o => o.i === q.c)] = 70; box.innerText = `Khán giả: A(${v[0]}%), B(${v[1]}%), C(${v[2]}%), D(${v[3]}%)`; }
-                else box.innerHTML = `Khán giả: <em>${q.hint}</em>`;
-            } else box.innerHTML = `Người thân: "Đáp án liên quan đến <strong>${q.hint}</strong>"`;
+                if (q.type === 'mcq') { 
+                    let v = [10, 10, 10, 10]; v[q.shuffled.findIndex(o => o.i === q.c)] = 70; 
+                    box.innerText = `Khán giả bình chọn: A(${v[0]}%), B(${v[1]}%), C(${v[2]}%), D(${v[3]}%)`; 
+                } else box.innerHTML = `<strong>Khán giả gợi ý:</strong><br>${q.hint}`;
+            } else {
+                box.innerHTML = `<strong>Người thân trả lời:</strong><br>${q.hint}`;
+            }
             renderMath();
         }
 
@@ -585,14 +624,8 @@
             state.isFinished = true; clearInterval(state.interval);
             let score = manual ? POINTS[state.currentIdx - 1] : (win ? 10 : (state.currentIdx < 5 ? 0 : (state.currentIdx < 10 ? 5 : 7)));
             
-            // Save to Firebase
             if (window.saveToFirestore) {
-                window.saveToFirestore({
-                    ...state.user,
-                    score,
-                    duration: 180 - state.timer,
-                    submitTime: Date.now()
-                });
+                window.saveToFirestore({ ...state.user, score, duration: 180 - state.timer, submitTime: Date.now() });
             }
 
             document.getElementById('screen-game').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen');
@@ -670,13 +703,23 @@
             draw();
         }
 
-        // --- ADMIN FUNCTIONS ---
-        function promptAdmin() {
-            const pass = prompt("Nhập mật khẩu quản trị:");
+        /* --- NEW ADMIN LOGIN LOGIC --- */
+        function showAdminLogin() {
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+            document.getElementById('admin-password-input').focus();
+        }
+        function closeAdminLogin() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            document.getElementById('admin-password-input').value = "";
+        }
+        function processAdminLogin() {
+            const pass = document.getElementById('admin-password-input').value;
             if (pass === "123456") {
+                closeAdminLogin();
                 showAdmin();
-            } else if (pass !== null) {
+            } else {
                 alert("Mật khẩu không chính xác!");
+                document.getElementById('admin-password-input').value = "";
             }
         }
 
@@ -692,65 +735,29 @@
         function renderAdminTable() {
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '';
-            
-            // Calculate Rank (Score desc, then duration asc)
             const sortedByRank = [...adminData].sort((a, b) => b.score - a.score || a.duration - b.duration);
-            
             adminData.forEach((item, index) => {
                 const rank = sortedByRank.findIndex(x => x === item) + 1;
                 const date = new Date(item.submitTime).toLocaleString('vi-VN');
-                const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td class="font-bold text-blue-700">${rank}</td>
-                        <td>${item.sbd}</td>
-                        <td class="text-left font-medium">${item.name}</td>
-                        <td>${item.class}</td>
-                        <td>${item.school}</td>
-                        <td class="font-bold text-red-600">${item.score.toFixed(1)}</td>
-                        <td>${item.duration}</td>
-                        <td class="text-[11px]">${date}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td class="font-bold text-blue-700">${rank}</td><td>${item.sbd}</td><td class="text-left font-medium">${item.name}</td><td>${item.class}</td><td>${item.school}</td><td class="font-bold text-red-600">${item.score.toFixed(1)}</td><td>${item.duration}</td><td class="text-[11px]">${date}</td></tr>`;
             });
         }
 
         function sortAdminData(criteria) {
-            if (criteria === 'rank') {
-                adminData.sort((a, b) => b.score - a.score || a.duration - b.duration);
-            } else if (criteria === 'score') {
-                adminData.sort((a, b) => b.score - a.score);
-            } else if (criteria === 'sbd') {
-                adminData.sort((a, b) => a.sbd.localeCompare(b.sbd));
-            } else if (criteria === 'duration') {
-                adminData.sort((a, b) => a.duration - b.duration);
-            } else if (criteria === 'class') {
-                adminData.sort((a, b) => a.class.localeCompare(b.class));
-            } else if (criteria === 'school') {
-                adminData.sort((a, b) => a.school.localeCompare(b.school));
-            } else if (criteria === 'submitTime') {
-                adminData.sort((a, b) => b.submitTime - a.submitTime);
-            }
+            if (criteria === 'rank') adminData.sort((a, b) => b.score - a.score || a.duration - b.duration);
+            else if (criteria === 'score') adminData.sort((a, b) => b.score - a.score);
+            else if (criteria === 'sbd') adminData.sort((a, b) => a.sbd.localeCompare(b.sbd));
+            else if (criteria === 'duration') adminData.sort((a, b) => a.duration - b.duration);
+            else if (criteria === 'class') adminData.sort((a, b) => a.class.localeCompare(b.class));
+            else if (criteria === 'school') adminData.sort((a, b) => a.school.localeCompare(b.school));
+            else if (criteria === 'submitTime') adminData.sort((a, b) => b.submitTime - a.submitTime);
             renderAdminTable();
         }
 
         function exportAdminToExcel() {
-            if (adminData.length === 0) return alert("Không có dữ liệu để xuất!");
-            
+            if (adminData.length === 0) return alert("Không có dữ liệu!");
             const sortedByRank = [...adminData].sort((a, b) => b.score - a.score || a.duration - b.duration);
-            const exportItems = adminData.map((item, idx) => ({
-                "STT": idx + 1,
-                "Hạng": sortedByRank.findIndex(x => x === item) + 1,
-                "Số báo danh": item.sbd,
-                "Họ và tên": item.name,
-                "Lớp": item.class,
-                "Trường": item.school,
-                "Điểm": item.score,
-                "Thời lượng (giây)": item.duration,
-                "Thời gian nộp": new Date(item.submitTime).toLocaleString('vi-VN')
-            }));
-
+            const exportItems = adminData.map((item, idx) => ({ "STT": idx + 1, "Hạng": sortedByRank.findIndex(x => x === item) + 1, "SBD": item.sbd, "Họ tên": item.name, "Lớp": item.class, "Trường": item.school, "Điểm": item.score, "TG làm (s)": item.duration, "Giờ nộp": new Date(item.submitTime).toLocaleString('vi-VN') }));
             const ws = XLSX.utils.json_to_sheet(exportItems);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Ket Qua");
@@ -781,16 +788,13 @@
         const auth = getAuth(app);
         const appId = 'altp-v11-tu-dien';
 
-        // Auth management
         onAuthStateChanged(auth, (user) => {
             const statusEl = document.getElementById('db-status');
             if (user) {
-                statusEl.innerText = "Đã kết nối Firebase";
-                statusEl.className = "admin-status status-connected";
+                if (statusEl) { statusEl.innerText = "Đã kết nối Firebase"; statusEl.className = "admin-status status-connected"; }
             } else {
                 signInAnonymously(auth).catch(e => {
-                    statusEl.innerText = "Lỗi kết nối: " + e.message;
-                    statusEl.className = "admin-status status-error";
+                    if (statusEl) { statusEl.innerText = "Lỗi: " + e.message; statusEl.className = "admin-status status-error"; }
                 });
             }
         });
@@ -809,10 +813,7 @@
                 const path = collection(db, 'artifacts', appId, 'public', 'data', 'results');
                 const snapshot = await getDocs(query(path));
                 return snapshot.docs.map(doc => doc.data());
-            } catch (e) { 
-                console.error("Firestore Fetch Error:", e); 
-                return [];
-            }
+            } catch (e) { console.error("Firestore Fetch Error:", e); return []; }
         };
     </script>
 </body>
