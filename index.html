@@ -768,62 +768,65 @@
     </script>
 
     <!-- FIREBASE MODULE -->
-   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyAuy5jsRqN-oQWEq53YEJHY5xTcUzMyld0",
-    authDomain: "vl11-tudien11.firebaseapp.com",
-    projectId: "vl11-tudien11",
-    storageBucket: "vl11-tudien11.firebasestorage.app",
-    messagingSenderId: "368811117039",
-    appId: "1:368811117039:web:2e6a73abc00c25f59c4e1a",
-    measurementId: "G-7B6WMBH22W"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAuy5jsRqN-oQWEq53YEJHY5xTcUzMyld0",
+  authDomain: "vl11-tudien11.firebaseapp.com",
+  projectId: "vl11-tudien11",
+  storageBucket: "vl11-tudien11.firebasestorage.app",
+  messagingSenderId: "368811117039",
+  appId: "1:368811117039:web:2e6a73abc00c25f59c4e1a",
+  measurementId: "G-7B6WMBH22W"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const appId = 'altp-v11-tu-dien';
+
+onAuthStateChanged(auth, (user) => {
+  const statusEl = document.getElementById('db-status');
+  if (user) {
+    if (statusEl) {
+      statusEl.innerText = "Đã kết nối Firebase";
+      statusEl.className = "admin-status status-connected";
+    }
+  } else {
+    signInAnonymously(auth).catch(e => {
+      if (statusEl) {
+        statusEl.innerText = "Lỗi: " + e.message;
+        statusEl.className = "admin-status status-error";
+      }
+    });
+  }
+});
+
+window.saveToFirestore = async (data) => {
+  try {
+    if (!auth.currentUser) await signInAnonymously(auth);
+    const path = collection(db, 'results');
+    await addDoc(path, data);
+  } catch (e) {
+    console.error("Firestore Save Error:", e);
+  }
+};
+
+window.fetchAdminData = async () => {
+  try {
+    if (!auth.currentUser) await signInAnonymously(auth);
+    const path = collection(db, 'results');
+    const snapshot = await getDocs(query(path));
+    return snapshot.docs.map(doc => doc.data());
+  } catch (e) {
+    console.error("Firestore Fetch Error:", e);
+    return [];
+  }
+};
 </script>
-      
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = 'altp-v11-tu-dien';
-
-        onAuthStateChanged(auth, (user) => {
-            const statusEl = document.getElementById('db-status');
-            if (user) {
-                if (statusEl) { statusEl.innerText = "Đã kết nối Firebase"; statusEl.className = "admin-status status-connected"; }
-            } else {
-                signInAnonymously(auth).catch(e => {
-                    if (statusEl) { statusEl.innerText = "Lỗi: " + e.message; statusEl.className = "admin-status status-error"; }
-                });
-            }
-        });
-
-        window.saveToFirestore = async (data) => {
-            try {
-                if (!auth.currentUser) await signInAnonymously(auth);
-                const path = collection(db, 'artifacts', appId, 'public', 'data', 'results');
-                await addDoc(path, data);
-            } catch (e) { console.error("Firestore Save Error:", e); }
-        };
-
-        window.fetchAdminData = async () => {
-            try {
-                if (!auth.currentUser) await signInAnonymously(auth);
-                const path = collection(db, 'artifacts', appId, 'public', 'data', 'results');
-                const snapshot = await getDocs(query(path));
-                return snapshot.docs.map(doc => doc.data());
-            } catch (e) { console.error("Firestore Fetch Error:", e); return []; }
-        };
-    </script>
 </body>
 </html>
