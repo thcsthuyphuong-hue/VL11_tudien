@@ -647,7 +647,7 @@ window.saveResult = async (data) => {
     try {
         console.log("🚀 Đang gửi:", data);
 
-        const docRef = await addDoc(collection(db, "results"), data);
+        const docRef = await 	addDoc(collection(db, "ketqua"), data);
 
         console.log("✅ Thành công:", docRef.id);
     } catch (e) {
