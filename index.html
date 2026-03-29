@@ -513,183 +513,84 @@
             `;
             if (score >= 5) startFireworks();
         
-            // 🔥 LƯU FIREBASE (ĐÃ TỐI ƯU NGOẶC)
-            if (typeof window.saveResult === 'function') {
-    await window.saveResult({
-        name: gameState.user.name || "N/A",
-        sbd: gameState.user.sbd || "N/A",
-        class: gameState.user.class || "N/A",
-        school: gameState.user.school || "N/A",
-        score: parseFloat(score.toFixed(1)),
-        duration: 180 - gameState.timer,
-        submitTime: Date.now()
-    });
-}
-			else {
-				console.error("❌ Lỗi: Hệ thống lưu dữ liệu chưa được nạp!");
+           <script>
+
+function checkAdminPassword(){
+
+    const pass = document.getElementById("admin-password").value;
+
+    if(pass === "112233@@"){
+        window.location.href = "admin.html";
+    }else{
+        alert("Sai mật khẩu!");
     }
-  }
-		function useLifeline(type) {
-            if (!gameState.lifelines[type]) return;
-            gameState.lifelines[type] = false;
-            document.getElementById(`life-${type}`).style.display = 'none';
-            const hint = document.getElementById('lifeline-hint');
-            hint.classList.remove('hidden');
-            const q = gameState.questions[gameState.currentLevel];
-            if (type === '5050') {
-                const wr = q.shuffled.filter(x => x.i !== q.c).sort(() => 0.5 - Math.random()).slice(0, 2);
-                document.querySelectorAll('.btn-answer').forEach(b => { wr.forEach(w => { if(b.innerText.includes(w.t)) b.style.visibility = 'hidden'; })});
-                hint.innerText = "Hệ thống đã loại bỏ 2 phương án sai.";
-            } else if (type === 'audience') {
-                if (q.type === 'mcq') {
-                    let v = [10, 10, 10, 10]; const cIdx = q.shuffled.findIndex(x => x.i === q.c); v[cIdx] = 70;
-                    hint.innerText = `Khán giả chọn: A:${v[0]}% B:${v[1]}% C:${v[2]}% D:${v[3]}%`;
-                } else hint.innerHTML = `Gợi ý khán giả: <em>${q.hint}</em>`;
-            } else hint.innerHTML = `Người thân gợi ý: "Mình nghĩ kiến thức là: <strong>${q.hint}</strong>"`;
-            renderMath();
-        }
 
-        function showRules() { playSound('pingpong'); document.getElementById('screen-login').classList.add('hidden-screen'); document.getElementById('screen-rules').classList.remove('hidden-screen'); }
-        function backToHome() { playSound('pingpong'); document.getElementById('screen-rules').classList.add('hidden-screen'); document.getElementById('screen-login').classList.remove('hidden-screen'); }
-        function showModal(t, b, btn, cb, level) { const card = document.getElementById('modal-card'); card.className = "milestone-card " + (level === 5 ? "level-5" : "level-10"); document.getElementById('modal-title').innerText = t; document.getElementById('modal-body').innerText = b; document.getElementById('modal-btn').innerText = btn; document.getElementById('global-modal').classList.remove('hidden'); window.modalCb = cb; renderMath(); }
-        function closeModal() { document.getElementById('global-modal').classList.add('hidden'); if(window.modalCb) window.modalCb(); }
-        function startTimer() { gameState.timerInterval = setInterval(() => { gameState.timer--; updateTimerUI(); if(gameState.timer <= 0) { clearInterval(gameState.timerInterval); end(false); } }, 1000); }
-        function updateTimerUI() { const t = document.getElementById('timer'); t.innerText = `${gameState.timer}s`; t.className = gameState.timer <= 10 ? "text-xl font-bold timer-warning" : "text-xl font-bold text-yellow-400"; }
-        function stopGameManual() { playSound('pingpong'); end(true, true); }
-        function restartGame() { location.reload(); }
-        function closeHistory() { document.getElementById('screen-history').classList.add('hidden-screen'); document.getElementById('screen-result').classList.remove('hidden-screen'); }
-
-        function showHistory() {
-            const cont = document.getElementById('history-content'); cont.innerHTML = '';
-            gameState.history.forEach((h, i) => {
-                const d = document.createElement('div'); d.className = `p-6 rounded-2xl bg-gray-50 text-gray-900 shadow-sm border-l-8 ${h.isCorrect ? 'border-green-500' : 'border-red-500'}`;
-                let ansH = "";
-                if (h.type === 'mcq') {
-                    ansH = `<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">`;
-                    h.details.shuffled.forEach((opt, idx) => {
-                        const isU = (idx === h.details.userIdx), isC = (opt.i === h.details.originalCorrect);
-                        let sC = "border p-3 rounded-xl flex justify-between ";
-                        if (isU) sC += h.isCorrect ? "bg-green-100 border-green-600 font-bold" : "bg-red-100 border-red-600 font-bold";
-                        else if (isC) sC += "bg-green-50 border-green-400 font-bold"; else sC += "bg-white border-gray-200 opacity-60";
-                        ansH += `<div class="${sC}"><span>${String.fromCharCode(65+idx)}. ${opt.t}</span> ${isU?(h.isCorrect?'✅':'❌'):(isC?'⭐':'')}</div>`;
-                    });
-                    ansH += `</div>`;
-                } else if (h.type === 'tf') {
-                    ansH = `<div class="mt-4 space-y-2">`;
-                    h.details.items.forEach((item, idx) => {
-                        const isR = h.details.selections[idx] === item.c;
-                        ansH += `<div class="p-3 border rounded-xl flex justify-between ${isR?'bg-green-50':'bg-red-50'}"><span>${String.fromCharCode(97+idx)}) ${item.text}</span><span class="text-sm">Bạn: ${h.details.selections[idx]?'Đ':'S'} | ĐA: ${item.c?'Đ':'S'}</span></div>`;
-                    });
-                    ansH += `</div>`;
-                } else ansH = `<div class="mt-4 p-4 border rounded-xl bg-white"><p>Bạn nhập: <span class="${h.isCorrect?'text-green-700':'text-red-700'} font-bold underline">${h.userAns}</span></p><p class="text-sm text-gray-600">Đáp án: <strong>${h.correctAns}</strong></p></div>`;
-                
-                d.innerHTML = `<h4 class="text-xl font-bold mb-2">Câu ${i+1}: ${h.q}</h4>${ansH}<div class="mt-4 p-4 bg-blue-50 rounded-xl border-l-4 border-blue-500 text-sm italic"><strong>Phân tích:</strong> ${h.exp}</div>`;
-                cont.appendChild(d);
-            });
-            document.getElementById('screen-result').classList.add('hidden-screen'); document.getElementById('screen-history').classList.remove('hidden-screen'); renderMath();
-        }
-
-        function startFireworks() {
-            const canvas = document.getElementById('fireworks'); const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            let parts = [];
-            function animate() {
-                if (!gameState.isGameOver) return; ctx.clearRect(0, 0, canvas.width, canvas.height);
-               if (Math.random() < 0.05) {
-  const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height * 0.5;
-
-  for (let i = 0; i < 30; i++) {
-    parts.push({
-      x: x,
-      y: y,
-      vx: (Math.random() - 0.5) * 8,
-      vy: (Math.random() - 0.5) * 8,
-      a: 1,
-      c: `hsl(${Math.random()*360},100%,50%)`
-    });
-  }
 }
-               parts.forEach((p, i) => {
-  p.x += p.vx;
-  p.y += p.vy;
-  p.vy += 0.1;
-  p.a -= 0.01;
 
-  ctx.globalAlpha = p.a;
-  ctx.fillStyle = p.c;
-  ctx.beginPath();
-  ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-  ctx.fill();
-});
-requestAnimationFrame(animate);
-				            }
-            animate();
-        }
-        window.onload = init;
-    </script>
+function closeAdmin(){
+    document.getElementById("admin-modal").classList.add("hidden");
+}
+
+</script>
+<!-- Firebase -->
 <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8KvdNyzsS7w-rTw--PyVnqCBltMKiH0w",
-            authDomain: "game-vat-ly-9-924bc.firebaseapp.com",
-            projectId: "game-vat-ly-9-924bc",
-            storageBucket: "game-vat-ly-9-924bc.firebasestorage.app",
-            messagingSenderId: "772223015613",
-            appId: "1:772223015613:web:8e5c4d6ae79249ee1f75d4"
-        };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+const firebaseConfig = {
+    apiKey: "AIzaSyDg4Q6rsrvPhY31oCpL4DAAjTKlgjJN1c0",
+    authDomain: "khtn9-5c1f4.firebaseapp.com",
+    projectId: "khtn9-5c1f4",
+    storageBucket: "khtn9-5c1f4.firebasestorage.app",
+    messagingSenderId: "498407772914",
+    appId: "1:498407772914:web:6d07ae107a73d4b342366b",
+    measurementId: "G-7MRG6Z7XZB"
+  };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-window.saveResult = async (data) => {
-    try {
-        console.log("🚀 Đang gửi:", data);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+</script>
+   
+    <script type="module">
 
-        const docRef = await 	addDoc(collection(db, "ketqua"), data);
+import { addDoc, collection } 
+from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-        console.log("✅ Thành công:", docRef.id);
-    } catch (e) {
-        console.error("🔥 FIREBASE ERROR:", e);
-        alert(e.message);
-    }
-}; 
-    </script>
+window.saveResult = async function(data){
+   try{
+      await addDoc(collection(window.db,"results"), data);
+      console.log("Saved to Firebase");
+   }catch(e){
+      console.error("Firebase error:", e);
+   }
+}
 
-    <script>
-        function goAdmin() {
-            const overlay = document.createElement('div');
-            overlay.style = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
-            overlay.innerHTML = `
-                <div style="background:white; padding:30px; border-radius:15px; text-align:center; color:black; box-shadow:0 0 20px rgba(0,0,0,0.5); width:300px;">
-                    <h3 style="margin-top:0; color:#1a2a6c; font-size:20px;">Xác thực Admin</h3>
-                    <p style="font-size:14px; color:#666; margin-bottom:15px;">Vui lòng nhập mật khẩu quản trị</p>
-                    <input type="password" id="admin-pass" placeholder="Mật khẩu..." style="padding:12px; border:2px solid #ddd; border-radius:8px; margin-bottom:20px; width:100%; box-sizing:border-box; outline:none; text-align:center; font-size:18px;">
-                    <div style="display:flex; gap:10px;">
-                        <button id="confirm-btn" style="flex:1; background:#2ecc71; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">XÁC NHẬN</button>
-                        <button id="cancel-btn" style="flex:1; background:#e74c3c; color:white; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">HỦY</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            const input = document.getElementById('admin-pass');
-            input.focus();
-            input.onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('confirm-btn').click(); };
-            document.getElementById('confirm-btn').onclick = () => {
-                if (input.value === "1234@@") {
-                    window.location.href = "admin.html";
-                } else {
-                    alert("Sai mật khẩu!");
-                    document.body.removeChild(overlay);
-                }
-            };
-            document.getElementById('cancel-btn').onclick = () => document.body.removeChild(overlay);
-        }
-    </script>
+</script>
+    <!-- ADMIN LOGIN -->
+<div id="admin-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200]">
+  <div class="bg-white p-6 rounded-xl shadow-xl w-80">    <h2 class="text-lg font-bold mb-4 text-center text-blue-700">
+      Đăng nhập ADMIN
+    </h2>
+    <input 
+      type="password"
+      id="admin-password"
+      placeholder="Nhập mật khẩu"
+      class="w-full border p-2 rounded mb-4"
+    >
+    <div class="flex gap-2">
+      <button onclick="checkAdminPassword()" 
+        class="flex-1 bg-blue-600 text-white py-2 rounded">
+        OK
+      </button>
 
-    <a href="javascript:void(0)" onclick="goAdmin()" style="position:fixed; bottom:10px; right:10px; background:rgba(0,0,0,0.5); color:white; padding:8px 15px; border-radius:5px; text-decoration:none; z-index:9999; font-size:12px; border:1px solid rgba(255,255,255,0.2);">
-        Admin
-    </a>
+      <button onclick="closeAdmin()" 
+        class="flex-1 bg-gray-300 py-2 rounded">
+        Hủy
+      </button>
+    </div>
+       </div>
+</div>
 </body>
 </html>
+
